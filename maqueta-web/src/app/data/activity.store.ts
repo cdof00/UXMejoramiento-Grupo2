@@ -28,7 +28,7 @@ export const DAYS = [
 export const COLORES = [
   '#7B6CFF',
   '#A78BFA',
-  '#6EE7B7',
+  '#4EA82A',
   '#C4B5FD',
   '#818CF8',
   '#5B4B8A',
