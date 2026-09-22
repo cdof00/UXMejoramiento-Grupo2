@@ -2,17 +2,33 @@ import { Injectable, signal } from '@angular/core';
 
 export type DayIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
+export type ActivityType = 'alarm' | 'break';
+
+export type OccurrenceKind = 'on' | 'off' | 'paused' | 'skipped' | 'moved';
+
+export interface ExceptionValue {
+  skip?: boolean;
+  time?: string;
+}
+
 export interface Activity {
   id: number;
   name: string;
   desc: string;
   color: string;
-  type: 'alarm' | 'break';
+  type: ActivityType;
   hours: Partial<Record<DayIndex, string>>;
   sync: boolean;
   yieldCalendar: boolean;
   paused: boolean;
-  exceptions: Record<string, { skip?: boolean; time?: string }>;
+  exceptions: Record<string, ExceptionValue>;
+}
+
+export interface Meeting {
+  day: DayIndex;
+  start: string;
+  end: string;
+  title: string;
 }
 
 export const DAYS = [
@@ -23,7 +39,7 @@ export const DAYS = [
   { i: 4 as DayIndex, short: 'Vie', name: 'viernes', date: 11 },
   { i: 5 as DayIndex, short: 'Sáb', name: 'sábado', date: 12 },
   { i: 6 as DayIndex, short: 'Dom', name: 'domingo', date: 13 },
-];
+] as const;
 
 export const COLORES = [
   '#7B6CFF',
@@ -36,87 +52,107 @@ export const COLORES = [
   '#34D399',
 ];
 
+const INITIAL_ACTIVITIES: Activity[] = [
+  {
+    id: 1,
+    name: 'Clase de métodos',
+    desc: 'Métodos de investigación',
+    color: COLORES[0],
+    type: 'alarm',
+    hours: { 0: '08:00', 2: '08:00', 3: '10:00' },
+    sync: true,
+    yieldCalendar: false,
+    paused: false,
+    exceptions: {},
+  },
+  {
+    id: 2,
+    name: 'Pastilla',
+    desc: 'Toma de la noche',
+    color: COLORES[1],
+    type: 'alarm',
+    hours: { 0: '21:00', 1: '21:00', 2: '21:00', 3: '21:00', 4: '21:00' },
+    sync: true,
+    yieldCalendar: false,
+    paused: false,
+    exceptions: {},
+  },
+  {
+    id: 3,
+    name: 'Break de pantalla',
+    desc: '30 de trabajo + 5 de pausa',
+    color: COLORES[2],
+    type: 'break',
+    hours: { 0: '09:00', 1: '09:00', 2: '09:00', 3: '09:00', 4: '09:00' },
+    sync: false,
+    yieldCalendar: true,
+    paused: false,
+    exceptions: {},
+  },
+];
+
 @Injectable({ providedIn: 'root' })
 export class ActivityStore {
-  private nextId = 4;
+  private nextId = Math.max(0, ...INITIAL_ACTIVITIES.map((actividad) => actividad.id)) + 1;
 
-  lista = signal<Activity[]>([
-    {
-      id: 1,
-      name: 'Clase de métodos',
-      desc: 'Métodos de investigación',
-      color: COLORES[0],
-      type: 'alarm',
-      hours: { 0: '08:00', 2: '08:00', 3: '10:00' },
-      sync: true,
-      yieldCalendar: false,
-      paused: false,
-      exceptions: {},
-    },
-    {
-      id: 2,
-      name: 'Pastilla',
-      desc: 'Toma de la noche',
-      color: COLORES[1],
-      type: 'alarm',
-      hours: { 0: '21:00', 1: '21:00', 2: '21:00', 3: '21:00', 4: '21:00' },
-      sync: true,
-      yieldCalendar: false,
-      paused: false,
-      exceptions: {},
-    },
-    {
-      id: 3,
-      name: 'Break de pantalla',
-      desc: '30 de trabajo + 5 de pausa',
-      color: COLORES[2],
-      type: 'break',
-      hours: { 0: '09:00', 1: '09:00', 2: '09:00', 3: '09:00', 4: '09:00' },
-      sync: false,
-      yieldCalendar: true,
-      paused: false,
-      exceptions: {},
-    },
-  ]);
+  lista = signal<Activity[]>(INITIAL_ACTIVITIES);
 
-  meetings = [{ day: 3 as DayIndex, start: '10:00', end: '11:00', title: 'Reunión de equipo' }];
+  readonly meetings: readonly Meeting[] = [
+    { day: 3 as DayIndex, start: '10:00', end: '11:00', title: 'Reunión de equipo' },
+  ];
 
-  byId(id: number) {
-    return this.lista().find((a) => a.id === id);
+  byId(id: number): Activity | undefined {
+    return this.lista().find((actividad) => actividad.id === id);
   }
 
-  occ(act: Activity, day: DayIndex) {
-    if (act.paused) {
-      return { kind: 'paused' as const, time: act.hours[day] || null };
+  occ(actividad: Activity, day: DayIndex): { kind: OccurrenceKind; time: string | null } {
+    if (actividad.paused) {
+      return { kind: 'paused', time: actividad.hours[day] ?? null };
     }
-    const ex = act.exceptions[String(day)];
-    if (ex?.skip) return { kind: 'skipped' as const, time: act.hours[day] || null };
-    if (ex?.time) return { kind: 'moved' as const, time: ex.time };
-    if (act.hours[day]) return { kind: 'on' as const, time: act.hours[day]! };
-    return { kind: 'off' as const, time: null };
+
+    const excepcion = actividad.exceptions[String(day)];
+    if (excepcion?.skip) {
+      return { kind: 'skipped', time: actividad.hours[day] ?? null };
+    }
+    if (excepcion?.time) {
+      return { kind: 'moved', time: excepcion.time };
+    }
+    if (actividad.hours[day]) {
+      return { kind: 'on', time: actividad.hours[day]! };
+    }
+    return { kind: 'off', time: null };
   }
 
-  guardar(data: Omit<Activity, 'id' | 'exceptions' | 'paused'> & { id?: number }) {
+  guardar(data: Omit<Activity, 'id' | 'exceptions' | 'paused'> & { id?: number }): number {
     if (data.id) {
-      this.lista.update((arr) => arr.map((a) => (a.id === data.id ? { ...a, ...data } : a)));
+      this.lista.update((actividades) =>
+        actividades.map((actividad) => (actividad.id === data.id ? { ...actividad, ...data } : actividad)),
+      );
       return data.id;
     }
+
     const id = this.nextId++;
-    this.lista.update((arr) => [...arr, { ...data, id, paused: false, exceptions: {} }]);
+    this.lista.update((actividades) => [...actividades, { ...data, id, paused: false, exceptions: {} }]);
     return id;
   }
 
-  borrar(id: number) {
-    this.lista.update((arr) => arr.filter((a) => a.id !== id));
+  borrar(id: number): void {
+    this.lista.update((actividades) => actividades.filter((actividad) => actividad.id !== id));
   }
 
-  pausar(id: number) {
-    this.lista.update((arr) => arr.map((a) => (a.id === id ? { ...a, paused: !a.paused } : a)));
+  pausar(id: number): void {
+    this.lista.update((actividades) =>
+      actividades.map((actividad) => (actividad.id === id ? { ...actividad, paused: !actividad.paused } : actividad)),
+    );
   }
 
-  excepcion(id: number, day: DayIndex, value: { skip?: boolean; time?: string }) {
-    this.lista.update((arr) =>
-      arr.map((a) => (a.id === id ? { ...a, exceptions: { ...a.exceptions, [String(day)]: value } } : a)),
+  excepcion(id: number, day: DayIndex, value: ExceptionValue): void {
+    this.lista.update((actividades) =>
+      actividades.map((actividad) =>
+        actividad.id === id
+          ? { ...actividad, exceptions: { ...actividad.exceptions, [String(day)]: value } }
+          : actividad,
+      ),
     );
   }
 }
