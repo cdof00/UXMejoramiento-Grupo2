@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,7 +10,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { COLORES, ActivityStore, DAYS, type DayIndex } from '../data/activity.store';
+import { COLORES, ActivityStore, DAYS, type ActivityType, type DayIndex } from '../data/activity.store';
+
+type Plantilla = 'clase' | 'pastilla' | 'break';
+type Patron = 'custom' | 'lv' | 'odd' | 'every2';
 
 @Component({
   selector: 'app-actividad',
@@ -34,7 +38,7 @@ import { COLORES, ActivityStore, DAYS, type DayIndex } from '../data/activity.st
       <p class="muted">{{ editId ? 'Esto cambia todos los días de la serie.' : 'Empieza por el nombre. La hora viene después.' }}</p>
 
       <p class="label">Plantilla</p>
-      <mat-chip-listbox [multiple]="false" [(ngModel)]="plantilla" (ngModelChange)="usarPlantilla($event)">
+      <mat-chip-listbox [multiple]="false" [(ngModel)]="plantilla" (ngModelChange)="aplicarPlantilla($event)">
         <mat-chip-option value="clase">Clase</mat-chip-option>
         <mat-chip-option value="pastilla">Pastilla</mat-chip-option>
         <mat-chip-option value="break">Break PC</mat-chip-option>
@@ -68,7 +72,7 @@ import { COLORES, ActivityStore, DAYS, type DayIndex } from '../data/activity.st
 
       @if (tipo !== 'break') {
         <p class="label">Patrón de días</p>
-        <mat-chip-listbox [multiple]="false" [(ngModel)]="patron" (ngModelChange)="usarPatron($event)">
+        <mat-chip-listbox [multiple]="false" [(ngModel)]="patron" (ngModelChange)="aplicarPatron($event)">
           <mat-chip-option value="custom">Días sueltos</mat-chip-option>
           <mat-chip-option value="lv">Lun a vie</mat-chip-option>
           <mat-chip-option value="odd">Impares</mat-chip-option>
@@ -85,7 +89,7 @@ import { COLORES, ActivityStore, DAYS, type DayIndex } from '../data/activity.st
             </mat-form-field>
           </div>
         }
-        @if (intento && !hayHora()) {
+        @if (intento && !tieneHora()) {
           <p class="error">Elige al menos un día y una hora.</p>
         }
         <label class="switch-row">
@@ -139,44 +143,75 @@ import { COLORES, ActivityStore, DAYS, type DayIndex } from '../data/activity.st
     </aside>
   `,
 })
-export class ActividadPage {
-  store = inject(ActivityStore);
-  route = inject(ActivatedRoute);
-  router = inject(Router);
-  snack = inject(MatSnackBar);
+export class ActividadPage implements OnInit {
+  private readonly store = inject(ActivityStore);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly snack = inject(MatSnackBar);
+  private readonly destroyRef = inject(DestroyRef);
 
-  days = DAYS;
-  colores = COLORES;
+  readonly days = DAYS;
+  readonly colores = COLORES;
+
   editId: number | null = null;
   name = '';
   desc = '';
-  color = COLORES[0];
-  tipo: 'alarm' | 'break' = 'alarm';
+  color: string = COLORES[0];
+  tipo: ActivityType = 'alarm';
   hours: Partial<Record<DayIndex, string>> = {};
   sync = true;
   cederCal = true;
-  plantilla: string | undefined;
-  patron: string | undefined = 'custom';
+  plantilla: Plantilla | undefined;
+  patron: Patron = 'custom';
   intento = false;
   paused = false;
 
-  constructor() {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!id) return;
-    const act = this.store.byId(id);
-    if (!act) return;
-    this.editId = act.id;
-    this.name = act.name;
-    this.desc = act.desc;
-    this.color = act.color;
-    this.tipo = act.type;
-    this.hours = { ...act.hours };
-    this.sync = act.sync;
-    this.cederCal = act.yieldCalendar;
-    this.paused = act.paused;
+  ngOnInit(): void {
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      const id = Number(params.get('id'));
+      this.cargarActividad(id);
+    });
   }
 
-  usarPlantilla(id: string) {
+  private cargarActividad(id: number): void {
+    if (!id) {
+      this.reiniciarFormulario();
+      return;
+    }
+
+    const actividad = this.store.byId(id);
+    if (!actividad) {
+      this.router.navigateByUrl('/');
+      return;
+    }
+
+    this.editId = actividad.id;
+    this.name = actividad.name;
+    this.desc = actividad.desc;
+    this.color = actividad.color;
+    this.tipo = actividad.type;
+    this.hours = { ...actividad.hours };
+    this.sync = actividad.sync;
+    this.cederCal = actividad.yieldCalendar;
+    this.paused = actividad.paused;
+  }
+
+  private reiniciarFormulario(): void {
+    this.editId = null;
+    this.name = '';
+    this.desc = '';
+    this.color = COLORES[0];
+    this.tipo = 'alarm';
+    this.hours = {};
+    this.sync = true;
+    this.cederCal = true;
+    this.plantilla = undefined;
+    this.patron = 'custom';
+    this.intento = false;
+    this.paused = false;
+  }
+
+  aplicarPlantilla(id: Plantilla): void {
     if (id === 'clase') {
       this.name = 'Clase de métodos';
       this.hours = { 0: '08:00', 2: '08:00', 3: '10:00' };
@@ -198,46 +233,49 @@ export class ActividadPage {
     }
   }
 
-  usarPatron(id: string) {
+  aplicarPatron(id: Patron): void {
     if (id === 'custom') return;
+
     const base = Object.values(this.hours).find(Boolean) || '08:00';
-    let dias: DayIndex[] = [];
-    if (id === 'lv') dias = [0, 1, 2, 3, 4];
-    if (id === 'odd') dias = [0, 2, 4];
-    if (id === 'every2') dias = [0, 2, 4, 6];
+    const dias: DayIndex[] =
+      id === 'lv' ? [0, 1, 2, 3, 4] : id === 'odd' ? [0, 2, 4] : id === 'every2' ? [0, 2, 4, 6] : [];
+
     const next: Partial<Record<DayIndex, string>> = {};
-    for (const d of dias) next[d] = base;
+    for (const d of dias) {
+      next[d] = base;
+    }
     this.hours = next;
   }
 
-  hayHora() {
+  tieneHora(): boolean {
     return Object.values(this.hours).some(Boolean);
   }
 
-  pausar() {
+  pausar(): void {
     if (!this.editId) return;
+
     this.store.pausar(this.editId);
     this.paused = !this.paused;
     this.snack.open(this.paused ? 'Serie pausada' : 'Serie reanudada', 'Ok', { duration: 2000 });
   }
 
-  borrar() {
+  borrar(): void {
     if (!this.editId) return;
     if (!confirm('¿Borrar toda la serie?')) return;
+
     this.store.borrar(this.editId);
     this.snack.open('Serie borrada', 'Ok', { duration: 2500 });
     this.router.navigateByUrl('/');
   }
 
-  guardar() {
+  guardar(): void {
     this.intento = true;
     if (!this.name.trim()) return;
-    if (this.tipo !== 'break' && !this.hayHora()) return;
+    if (this.tipo !== 'break' && !this.tieneHora()) return;
 
-    let hours = this.hours;
-    if (this.tipo === 'break') {
-      hours = { 0: '09:00', 1: '09:00', 2: '09:00', 3: '09:00', 4: '09:00' };
-    }
+    const hours = this.tipo === 'break'
+      ? { 0: '09:00', 1: '09:00', 2: '09:00', 3: '09:00', 4: '09:00' }
+      : this.hours;
 
     this.store.guardar({
       id: this.editId ?? undefined,
@@ -249,6 +287,7 @@ export class ActividadPage {
       sync: this.tipo === 'break' ? false : this.sync,
       yieldCalendar: this.tipo === 'break' ? this.cederCal : false,
     });
+
     this.snack.open(this.editId ? 'Serie actualizada' : 'Actividad creada', 'Cerrar', { duration: 2200 });
     this.router.navigateByUrl('/');
   }
