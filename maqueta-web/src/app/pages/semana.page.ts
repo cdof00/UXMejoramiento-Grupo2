@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,14 +17,14 @@ import { ActivityStore, DAYS, type Activity, type DayIndex } from '../data/activ
           <p>Una actividad, distintos horarios</p>
         </div>
         <div class="week-nav">
-          <button mat-icon-button (click)="aviso('En el prototipo solo está esta semana')">
+          <button mat-icon-button (click)="mostrarAviso('En el prototipo solo está esta semana')">
             <mat-icon>chevron_left</mat-icon>
           </button>
           <div>
             <strong>7 — 13 septiembre</strong><br />
             Hoy, lunes 7 · 09:18 en el PC
           </div>
-          <button mat-icon-button (click)="aviso('En el prototipo solo está esta semana')">
+          <button mat-icon-button (click)="mostrarAviso('En el prototipo solo está esta semana')">
             <mat-icon>chevron_right</mat-icon>
           </button>
         </div>
@@ -83,7 +83,7 @@ import { ActivityStore, DAYS, type Activity, type DayIndex } from '../data/activ
                   }
                 </div>
                 @for (m of reuniones(d.i); track m.title) {
-                  <button class="meet" type="button" (click)="aviso('Pausa omitida: ' + m.title + ' está en Calendar')">
+                  <button class="meet" type="button" (click)="mostrarAviso('Pausa omitida: ' + m.title + ' está en Calendar')">
                     Calendar · {{ m.start }} {{ m.title }}
                   </button>
                 }
@@ -99,7 +99,7 @@ import { ActivityStore, DAYS, type Activity, type DayIndex } from '../data/activ
                         (click)="abrirDia(act, d.i)">
                         <small>{{ o.time || '—' }}</small>
                         <b>{{ act.name }}</b>
-                        <small>{{ act.type === 'break' ? '30 + 5 · no va al celular' : act.sync ? 'también celular' : 'solo PC' }}</small>
+                        <small>{{ subtituloBloque(act) }}</small>
                         @if (o.kind === 'moved') { <span class="tag">este día</span> }
                         @if (o.kind === 'skipped') { <span class="tag">omitido</span> }
                         @if (o.kind === 'paused') { <span class="tag">pausada</span> }
@@ -121,18 +121,19 @@ import { ActivityStore, DAYS, type Activity, type DayIndex } from '../data/activ
   `,
 })
 export class SemanaPage {
-  store = inject(ActivityStore);
-  router = inject(Router);
-  snack = inject(MatSnackBar);
-  days = DAYS;
+  readonly store = inject(ActivityStore);
+  private readonly router = inject(Router);
+  private readonly snack = inject(MatSnackBar);
+
+  readonly days = DAYS;
   vacio = false;
 
-  conFondo() {
-    const u = this.router.url;
-    return u.startsWith('/actividad') || u.startsWith('/este-dia');
-  }
+  readonly conFondo = computed(() => {
+    const url = this.router.url;
+    return url.startsWith('/actividad') || url.startsWith('/este-dia');
+  });
 
-  cerrar() {
+  cerrar(): void {
     this.router.navigateByUrl('/');
   }
 
@@ -140,17 +141,22 @@ export class SemanaPage {
     return this.store.meetings.filter((m) => m.day === day);
   }
 
-  abrirDia(act: Activity, day: DayIndex) {
+  abrirDia(act: Activity, day: DayIndex): void {
     this.router.navigate(['/este-dia', act.id, day]);
   }
 
-  etiqueta(act: Activity) {
+  etiqueta(act: Activity): string {
     if (act.paused) return 'Pausada';
     if (act.type === 'break') return '30 + 5 · solo PC';
     return act.sync ? 'PC y celular' : 'solo PC';
   }
 
-  aviso(msg: string) {
+  subtituloBloque(act: Activity): string {
+    if (act.type === 'break') return '30 + 5 · no va al celular';
+    return act.sync ? 'también celular' : 'solo PC';
+  }
+
+  mostrarAviso(msg: string): void {
     this.snack.open(msg, 'Cerrar', { duration: 2800 });
   }
 }
