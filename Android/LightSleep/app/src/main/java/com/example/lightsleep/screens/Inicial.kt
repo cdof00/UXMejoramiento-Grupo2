@@ -1,4 +1,4 @@
-package com.example.lightsleep
+package com.example.lightsleep.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,8 +29,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import com.example.lightsleep.R
 
 @Composable
 fun Inicial(modifier: Modifier = Modifier) {
@@ -43,6 +43,7 @@ fun Inicial(modifier: Modifier = Modifier) {
         Image(
             painter = painterResource(id = R.drawable.fondoappmejorado1),
             contentDescription = "fondo app mejorado 1",
+            alpha = 0.2F,
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
                 .offset(x = 3.dp,
@@ -61,27 +62,11 @@ fun Inicial(modifier: Modifier = Modifier) {
                     y = 71.dp)
                 .requiredWidth(width = 185.dp)
                 .requiredHeight(height = 56.dp))
-        Text(
-            text = "Crear",
-            color = Color.White,
-            style = TextStyle(
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Medium),
-            modifier = Modifier
-                .align(alignment = Alignment.TopStart)
-                .offset(x = 316.dp,
-                    y = 85.dp)
-                .requiredWidth(width = 83.dp)
-                .requiredHeight(height = 30.dp))
-        TypeRoundSizeSmallWidthDefaultStateEnabled(
-            modifier = Modifier
-                .align(alignment = Alignment.TopStart)
-                .offset(x = 262.dp,
-                    y = 85.dp))
+
         Text(
             text = "No tiene alarmas",
             color = Color.White,
-            style = MaterialTheme.typography.headlineLarge,
+            style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
                 .offset(x = 93.dp,
