@@ -32,10 +32,20 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.materialIcon
+import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.Cancel
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.LightMode
+import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.TextFields
+import androidx.compose.material.icons.outlined.Today
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
@@ -44,9 +54,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TimeInput
+import androidx.compose.material3.TimePickerDefaults
+import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,25 +74,45 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lightsleep.R
 import com.example.lightsleep.viewmodels.AlarmViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = viewModel()) {
-    val width = LocalWindowInfo.current.containerDpSize.width
 
     val alarmUiState by alarmViewModel.alarmState.collectAsState()
+    val alarmHourState by alarmViewModel.alarmHour.collectAsState()
+    val alarmMinuteState by alarmViewModel.alarmMinute.collectAsState()
 
     val openTimeDialog = remember { mutableStateOf(false) }
-    val openFreq1Dialog = remember { mutableStateOf(false) }
-    val openFreq2Dialog = remember { mutableStateOf(false) }
-    val openActiveDialog = remember { mutableStateOf(false) }
-    val openBulbDialog = remember { mutableStateOf(false) }
-    val openWordsDialog = remember { mutableStateOf(false) }
+    val openFreqDialog = remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
-            .requiredWidth(width = width)
+            .requiredWidth(width = LocalWindowInfo.current.containerDpSize.width)
             .requiredHeight(height = LocalWindowInfo.current.containerDpSize.height)
             .background(color = darkColorScheme().surfaceContainerLowest)
     ) {
+        if(openTimeDialog.value){
+
+            val currentTime = Calendar.getInstance()
+            val hour = if (alarmHourState != -1) alarmHourState else currentTime.get(Calendar.HOUR_OF_DAY)
+            val minute = if (alarmMinuteState != -1) alarmMinuteState else currentTime.get(Calendar.MINUTE)
+            val timePickerState = rememberTimePickerState(
+                initialHour = hour,
+                initialMinute = minute,
+                is24Hour = false,
+            )
+
+            TimeDialog(
+                onDismissRequest = { openTimeDialog.value = false },
+                onConfirmation = {
+                    openTimeDialog.value = false
+                    alarmViewModel.updateHour(timePickerState.hour)
+                    alarmViewModel.updateMinute(timePickerState.minute)
+                },
+                dialogTitle = "Ingrese hora",
+                timePickerState = timePickerState
+            )
+        }
         TypeRoundSizeSmallStateEnabled(
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
@@ -95,7 +128,7 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
 
         OutlinedTextField(
             modifier = Modifier
-                .requiredWidth(width = width)
+                .requiredWidth(width = LocalWindowInfo.current.containerDpSize.width)
                 .align(alignment = Alignment.TopStart)
                 .offset(
                     x = 0.dp,
@@ -178,7 +211,8 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
             .offset(
                 x = 0.dp,
                 y = 287.dp
-            ),)
+            ),
+            openTimeDialog)
         TypeRoundSizeSmallStateEnabled(
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
@@ -218,32 +252,31 @@ fun TypeRoundSizeSmallStateEnabled(modifier: Modifier = Modifier, labelText: Str
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .clip(shape = RoundedCornerShape(100.dp))
-                .background(color = backgroundColor)
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp,
-                        vertical = 10.dp)
+
             ) {
-                Close(iconId = iconId)
+            Button(
+                modifier = Modifier
+                    .clip(shape = RoundedCornerShape(100.dp)),
+                colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
+                onClick = { }) {
+                ButtonIcon(iconId = iconId)
                 Text(
                     text = labelText,
                     color = textColor,
                     lineHeight = 1.43.em,
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier
-                        .wrapContentHeight(align = Alignment.CenterVertically))
+                        .wrapContentHeight(align = Alignment.CenterVertically)
+                )
+
             }
         }
     }
 }
 
 @Composable
-fun ThemeStandardGroups1(modifier: Modifier = Modifier) {
+fun ThemeStandardGroups1(modifier: Modifier = Modifier, openTimeDialog: MutableState<Boolean>) {
+
     Row(
         modifier = modifier
             .requiredWidth(width = LocalWindowInfo.current.containerDpSize.width)
@@ -253,71 +286,48 @@ fun ThemeStandardGroups1(modifier: Modifier = Modifier) {
     ) {
         Column(
         ) {
-            ElementoMenuCrearAlarma(modifier = Modifier.padding(bottom=20.dp, top=10.dp),titulo ="Hora", icon = R.drawable.alarm_24dp, onClick = {})
-            ElementoMenuCrearAlarma(modifier = Modifier.padding(bottom=20.dp, top=20.dp),titulo="Frecuencia", icon = R.drawable.edit_24dp, onClick = {})
-            ElementoMenuCrearAlarma(modifier = Modifier.padding(bottom=20.dp, top=20.dp),titulo="Activa por", icon = R.drawable.today_24dp, onClick = {})
-            ElementoMenuCrearAlarma(modifier = Modifier.padding(bottom=20.dp, top=20.dp),titulo="Opciones de Bombillo", icon = R.drawable.light_mode_24dp, onClick = {})
-            ElementoMenuCrearAlarma(modifier = Modifier.padding(bottom=10.dp,top=20.dp),titulo="Palabra Calve", icon = R.drawable.text_fields_24dp, onClick = {})
+            DropdownMenuItem(
+                modifier = Modifier.padding(top=10.dp),
+                text = { Text(text = "Hora", style = MaterialTheme.typography.bodyLarge, color = lightColorScheme().surface) },
+                leadingIcon = { Icon(Icons.Outlined.Alarm, contentDescription = null, tint = darkColorScheme().primary) },
+                trailingIcon = { Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = darkColorScheme().primary) },
+                onClick = { openTimeDialog.value = true }
+            )
+            HorizontalFullwidth()
+            DropdownMenuItem(
+                modifier = Modifier.padding( top=30.dp),
+                text = { Text(text = "Frecuencia", style = MaterialTheme.typography.bodyLarge, color = lightColorScheme().surface) },
+                leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null, tint = darkColorScheme().primary) },
+                trailingIcon = { Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = darkColorScheme().primary) },
+                onClick = { openTimeDialog.value = true }
+            )
+            HorizontalFullwidth()
+            DropdownMenuItem(
+                modifier = Modifier.padding( top=30.dp),
+                text = { Text(text = "Activa Por", style = MaterialTheme.typography.bodyLarge, color = lightColorScheme().surface) },
+                leadingIcon = { Icon(Icons.Outlined.Today, contentDescription = null, tint = darkColorScheme().primary) },
+                trailingIcon = { Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = darkColorScheme().primary) },
+                onClick = { openTimeDialog.value = true }
+            )
+            HorizontalFullwidth()
+            DropdownMenuItem(
+                modifier = Modifier.padding( top=30.dp),
+                text = { Text(text = "Opciones de Bombilllo", style = MaterialTheme.typography.bodyLarge, color = lightColorScheme().surface) },
+                leadingIcon = { Icon(Icons.Outlined.LightMode, contentDescription = null, tint = darkColorScheme().primary) },
+                trailingIcon = { Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = darkColorScheme().primary) },
+                onClick = { openTimeDialog.value = true }
+            )
+            HorizontalFullwidth()
+            DropdownMenuItem(
+                modifier = Modifier.padding( top=30.dp),
+                text = { Text(text = "Palabra Clave", style = MaterialTheme.typography.bodyLarge, color = lightColorScheme().surface) },
+                leadingIcon = { Icon(Icons.Outlined.TextFields, contentDescription = null, tint = darkColorScheme().primary) },
+                trailingIcon = { Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = darkColorScheme().primary) },
+                onClick = { openTimeDialog.value = true }
+            )
+            HorizontalFullwidth()
         }
     }
-}
-
-
-@Composable
-fun ElementoMenuCrearAlarma(modifier: Modifier = Modifier, titulo:String, icon: Int, onClick:() -> Unit) {
-    Column(
-        modifier = modifier
-            .requiredWidth(width = LocalWindowInfo.current.containerDpSize.width)
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .requiredHeight(height = 40.dp)
-                .padding(horizontal = 12.dp,
-                    vertical = 8.dp)
-        ) {
-            LeadingIcon(id = icon, color = darkColorScheme().primary)
-            Column(
-                modifier = Modifier
-                    .weight(weight = 1f)
-            ) {
-                Text(
-                    text = titulo,
-                    color = lightColorScheme().surface,
-                    lineHeight = 1.5.em,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(align = Alignment.CenterVertically))
-            }
-            TrailingIcon(id = R.drawable.play_arrow_24dp, color = darkColorScheme().primary)
-        }
-        HorizontalFullwidth()
-    }
-}
-
-@Composable
-fun LeadingIcon(modifier: Modifier = Modifier, id: Int, color: Color ) {
-    Icon(
-        painter = painterResource(id = id),
-        contentDescription = "Icon",
-        tint = color,
-        modifier = Modifier
-            .requiredSize(size = 24.dp))
-
-}
-
-@Composable
-fun TrailingIcon(modifier: Modifier = Modifier, id: Int, color: Color ) {
-    Icon(
-        painter = painterResource(id = id),
-        contentDescription = "Icon",
-        tint = color,
-        modifier = Modifier
-            .requiredSize(size = 24.dp))
-
 }
 
 @Composable
@@ -333,7 +343,7 @@ fun HorizontalFullwidth(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun Close(modifier: Modifier = Modifier, iconId: Int) {
+fun ButtonIcon(modifier: Modifier = Modifier, iconId: Int) {
     Icon(
         painter = painterResource(id = iconId),
         contentDescription = "Icon",
@@ -344,50 +354,45 @@ fun Close(modifier: Modifier = Modifier, iconId: Int) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InputExample(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
+fun TimePickerAlarma(
+    timePickerState: TimePickerState
 ) {
-    val currentTime = Calendar.getInstance()
-
-    val timePickerState = rememberTimePickerState(
-        initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
-        initialMinute = currentTime.get(Calendar.MINUTE),
-        is24Hour = true,
-    )
-
     Column {
         TimeInput(
             state = timePickerState,
+            colors = TimePickerDefaults.colors(
+                containerColor = darkColorScheme().primary,
+                periodSelectorBorderColor = darkColorScheme().outline,
+                periodSelectorUnselectedContainerColor = darkColorScheme().surfaceContainerHigh,
+                periodSelectorSelectedContainerColor = darkColorScheme().tertiaryContainer,
+                periodSelectorSelectedContentColor = darkColorScheme().onTertiaryContainer,
+                periodSelectorUnselectedContentColor = darkColorScheme().onSurfaceVariant,
+                timeSelectorSelectedContainerColor = darkColorScheme().primaryContainer,
+                timeSelectorUnselectedContainerColor = darkColorScheme().surfaceContainerHighest,
+                timeSelectorSelectedContentColor = darkColorScheme().onPrimaryContainer,
+                timeSelectorUnselectedContentColor = darkColorScheme().onSurface
+            )
         )
-        Button(onClick = onDismiss) {
-            Text("Dismiss picker")
-        }
-        Button(onClick = onConfirm) {
-            Text("Confirm selection")
-        }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlertDialogExample(
+fun TimeDialog(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
     dialogTitle: String,
-    dialogText: String,
-    icon: ImageVector,
+    timePickerState: TimePickerState
 ) {
     AlertDialog(
+        containerColor = darkColorScheme().surfaceContainerHigh,
+        titleContentColor = darkColorScheme().onSurfaceVariant,
         title = {
             Text(text = dialogTitle)
         },
-        text = {
-            ThemeStandardGroups1(modifier = Modifier
-                .offset(
-                    x = 0.dp,
-                    y = 287.dp
-                ),)
-        },
+        text = {TimePickerAlarma(
+            timePickerState
+        )},
         onDismissRequest = {
             onDismissRequest()
         },
@@ -397,7 +402,7 @@ fun AlertDialogExample(
                     onConfirmation()
                 }
             ) {
-                Text("Confirm")
+                Text(text = "Guardar", color = darkColorScheme().primary)
             }
         },
         dismissButton = {
@@ -406,7 +411,48 @@ fun AlertDialogExample(
                     onDismissRequest()
                 }
             ) {
-                Text("Dismiss")
+                Text(text = "Cancelar", color = darkColorScheme().primary)
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FreqDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    dialogTitle: String,
+    timePickerState: TimePickerState
+) {
+    AlertDialog(
+        containerColor = darkColorScheme().surfaceContainerHigh,
+        titleContentColor = darkColorScheme().onSurfaceVariant,
+        title = {
+            Text(text = dialogTitle)
+        },
+        text = {TimePickerAlarma(
+            timePickerState
+        )},
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmation()
+                }
+            ) {
+                Text(text = "Guardar", color = darkColorScheme().primary)
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text(text = "Cancelar", color = darkColorScheme().primary)
             }
         }
     )
