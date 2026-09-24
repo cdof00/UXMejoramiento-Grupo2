@@ -255,9 +255,9 @@ fun ThemeStandardGroups1(modifier: Modifier = Modifier) {
         ) {
             ElementoMenuCrearAlarma(modifier = Modifier.padding(bottom=20.dp, top=10.dp),titulo ="Hora", icon = R.drawable.alarm_24dp, onClick = {})
             ElementoMenuCrearAlarma(modifier = Modifier.padding(bottom=20.dp, top=20.dp),titulo="Frecuencia", icon = R.drawable.edit_24dp, onClick = {})
-            ElementoMenuCrearAlarma(modifier = Modifier.padding(bottom=20.dp, top=20.dp),titulo="Activa por", icon = R.drawable.edit_24dp, onClick = {})
-            ElementoMenuCrearAlarma(modifier = Modifier.padding(bottom=20.dp, top=20.dp),titulo="Palabra 4", icon = R.drawable.edit_24dp, onClick = {})
-            ElementoMenuCrearAlarma(modifier = Modifier.padding(bottom=10.dp,top=20.dp),titulo="Palabra 5", icon = R.drawable.edit_24dp, onClick = {})
+            ElementoMenuCrearAlarma(modifier = Modifier.padding(bottom=20.dp, top=20.dp),titulo="Activa por", icon = R.drawable.today_24dp, onClick = {})
+            ElementoMenuCrearAlarma(modifier = Modifier.padding(bottom=20.dp, top=20.dp),titulo="Opciones de Bombillo", icon = R.drawable.light_mode_24dp, onClick = {})
+            ElementoMenuCrearAlarma(modifier = Modifier.padding(bottom=10.dp,top=20.dp),titulo="Palabra Calve", icon = R.drawable.text_fields_24dp, onClick = {})
         }
     }
 }
