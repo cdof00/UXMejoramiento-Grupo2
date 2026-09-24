@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 
 class AlarmViewModel(application: Application) :  AndroidViewModel(application) {
 
-    val usernameState = TextFieldState()
+    var alarmNameState = TextFieldState()
 
     private val _uiState = MutableStateFlow(AlarmListUiState())
     val uiState: StateFlow<AlarmListUiState> = _uiState
@@ -43,6 +43,6 @@ class AlarmViewModel(application: Application) :  AndroidViewModel(application) 
         get() = _isNetworkErrorShown
 
     init {
-
+        alarmNameState = TextFieldState("Alarma 1")
     }
 }

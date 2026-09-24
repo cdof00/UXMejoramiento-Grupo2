@@ -1,5 +1,6 @@
 package com.example.lightsleep.screens
 
+import android.icu.util.Calendar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
@@ -32,18 +33,27 @@ import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.outlined.Cancel
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TimeInput
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextRange
@@ -56,6 +66,13 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
     val width = LocalWindowInfo.current.containerDpSize.width
 
     val alarmUiState by alarmViewModel.alarmState.collectAsState()
+
+    val openTimeDialog = remember { mutableStateOf(false) }
+    val openFreq1Dialog = remember { mutableStateOf(false) }
+    val openFreq2Dialog = remember { mutableStateOf(false) }
+    val openActiveDialog = remember { mutableStateOf(false) }
+    val openBulbDialog = remember { mutableStateOf(false) }
+    val openWordsDialog = remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -84,7 +101,7 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
                     x = 0.dp,
                     y = 164.dp
                 ),
-            state = alarmViewModel.usernameState,
+            state = alarmViewModel.alarmNameState,
             lineLimits = TextFieldLineLimits.SingleLine,
             label = { Text("Nombre de alarma") },
             shape = RoundedCornerShape(
@@ -94,8 +111,8 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
                 bottomStart = 0.dp
             ),
             trailingIcon = {
-                if (alarmViewModel.usernameState.text.isNotEmpty()) {
-                    IconButton(onClick = { alarmViewModel.usernameState.edit {
+                if (alarmViewModel.alarmNameState.text.isNotEmpty()) {
+                    IconButton(onClick = { alarmViewModel.alarmNameState.edit {
                         replace(0, length, "")
                      }}) {
                         Icon(
@@ -105,6 +122,7 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
                     }
                 }
             },
+
             colors = TextFieldColors(
                 focusedTextColor = darkColorScheme().inverseSurface,
                 unfocusedTextColor = darkColorScheme().inverseSurface,
@@ -117,8 +135,8 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
                 cursorColor = darkColorScheme().primary,
                 errorCursorColor = darkColorScheme().primary,
                 textSelectionColors = TextSelectionColors(
-                    handleColor = darkColorScheme().inverseOnSurface,
-                    backgroundColor = darkColorScheme().inverseOnSurface
+                    handleColor = darkColorScheme().primary,
+                    backgroundColor = darkColorScheme().primary
                 ),
                 focusedIndicatorColor = darkColorScheme().primary,
                 unfocusedIndicatorColor = darkColorScheme().primary,
@@ -168,7 +186,7 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
                     x = 281.dp,
                     y = 851.dp
                 ),
-            labelText = "Label 3",
+            labelText = "Guardar",
             textColor = darkColorScheme().inverseSurface,
             backgroundColor = darkColorScheme().inversePrimary,
             iconId = R.drawable.check_24dp
@@ -181,7 +199,7 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
                     x = 41.dp,
                     y = 851.dp
                 ),
-            labelText = "Label 4",
+            labelText = "Cancelar",
             textColor = darkColorScheme().inverseSurface,
             backgroundColor = darkColorScheme().tertiaryContainer,
             iconId = R.drawable.close_24dp
@@ -322,6 +340,76 @@ fun Close(modifier: Modifier = Modifier, iconId: Int) {
         tint = darkColorScheme().onPrimaryContainer,
         modifier = Modifier
             .requiredSize(size = 20.dp))
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun InputExample(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val currentTime = Calendar.getInstance()
+
+    val timePickerState = rememberTimePickerState(
+        initialHour = currentTime.get(Calendar.HOUR_OF_DAY),
+        initialMinute = currentTime.get(Calendar.MINUTE),
+        is24Hour = true,
+    )
+
+    Column {
+        TimeInput(
+            state = timePickerState,
+        )
+        Button(onClick = onDismiss) {
+            Text("Dismiss picker")
+        }
+        Button(onClick = onConfirm) {
+            Text("Confirm selection")
+        }
+    }
+}
+
+@Composable
+fun AlertDialogExample(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    dialogTitle: String,
+    dialogText: String,
+    icon: ImageVector,
+) {
+    AlertDialog(
+        title = {
+            Text(text = dialogTitle)
+        },
+        text = {
+            ThemeStandardGroups1(modifier = Modifier
+                .offset(
+                    x = 0.dp,
+                    y = 287.dp
+                ),)
+        },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmation()
+                }
+            ) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text("Dismiss")
+            }
+        }
+    )
 }
 
 @Preview(widthDp = 428, heightDp = 926)
