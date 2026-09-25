@@ -274,31 +274,40 @@ app-aviso {
 .notify-card {
  position: fixed;
  z-index: 40;
- left: 50%;
- top: 50%;
- transform: translate(-50%, -50%);
- width: min(420px, calc(100vw - 32px));
+ right: 20px;
+ bottom: 20px;
+ width: min(360px, calc(100vw - 40px));
  background: var(--surface);
  border-radius: 20px;
- padding: 28px;
- text-align: center;
+ padding: 20px;
+ text-align: left;
  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+ animation: notify-slide 0.35s ease-out;
+}
+@keyframes notify-slide {
+ from { transform: translateY(-120%); opacity: 0; }
+ to { transform: translateY(0); opacity: 1; }
 }
 .notify-card mat-icon {
- font-size: 48px;
- width: 48px;
- height: 48px;
+ font-size: 32px;
+ width: 32px;
+ height: 32px;
  color: var(--primary);
+ margin-bottom: 8px;
 }
 .notify-card small {
  display: block;
  color: var(--muted);
  text-transform: uppercase;
  letter-spacing: .1em;
- margin-bottom: 8px;
+ font-size: 11px;
 }
-.notify-card h1 { margin: 8px 0 4px; font-size: 24px; font-weight: 500; }
-.notify-card p { margin: 4px 0; color: var(--muted); }
+.notify-card h1 { margin: 4px 0; font-size: 18px; font-weight: 500; }
+.notify-card p { margin: 2px 0; color: var(--muted); font-size: 14px; }
+.notify-card .actions {
+ justify-content: flex-end;
+ margin-top: 16px;
+}
 
 .timer {
  font-size: 72px;
