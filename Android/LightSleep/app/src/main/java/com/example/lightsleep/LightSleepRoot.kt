@@ -13,6 +13,7 @@ import androidx.core.view.WindowCompat.enableEdgeToEdge
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.lightsleep.screens.AlarmaCreada
 import com.example.lightsleep.screens.CrearAlarma
 import com.example.lightsleep.screens.Inicial
 import com.example.lightsleep.screens.ListaPalabrasClave
@@ -46,12 +47,12 @@ fun LightSleepApp(modifier: Modifier = Modifier) {
         composable("crear_alarma") {
             CrearAlarma(
                 onVolver = { navController.popBackStack() },
-                onPalabrasClave = { navController.navigate("lista_palabras_clave") }
+                onCrear = { navController.navigate("alarma-creada") }
             )
         }
-        composable("lista_palabras_clave") {
-            ListaPalabrasClave(
-                onVolver = { navController.popBackStack() }
+        composable("alarma-creada") {
+            AlarmaCreada(
+                onCrearAlarma = { navController.navigate("crear_alarma") }
             )
         }
     }

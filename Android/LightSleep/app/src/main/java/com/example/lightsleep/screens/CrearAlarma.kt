@@ -102,7 +102,7 @@ fun CrearAlarma(
     modifier: Modifier = Modifier,
     alarmViewModel: AlarmViewModel = viewModel(),
     onVolver: () -> Unit = {},
-    onPalabrasClave: () -> Unit = {}
+    onCrear: () -> Unit = {}
 ) {
 
     val alarmHourState by alarmViewModel.alarmHour.collectAsState()
@@ -176,7 +176,7 @@ fun CrearAlarma(
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            val selectionMillis = datePickerState.selectedDateMillis
+                            openDateDialog.value = false
                         }
                     ) {
                         Text("Guardar")
@@ -322,7 +322,7 @@ fun CrearAlarma(
             openFreqDialog,
             openDateDialog,
             openBulbDialog,
-            onPalabrasClave)
+            openWordsDialog)
 
         TypeRoundSizeSmallStateEnabled(
             modifier = Modifier
@@ -335,7 +335,7 @@ fun CrearAlarma(
             textColor = darkColorScheme().inverseSurface,
             backgroundColor = darkColorScheme().inversePrimary,
             iconId = R.drawable.check_24dp,
-            onClick = { }
+            onClick = onCrear
 
         )
         TypeRoundSizeSmallStateEnabled(
@@ -401,7 +401,7 @@ fun ThemeStandardGroups1(
     openFreqDialog: MutableState<Boolean>,
     openDateDialog: MutableState<Boolean>,
     openBulbDialog: MutableState<Boolean>,
-    onPalabrasClave: () -> Unit
+    openWordsDialog: MutableState<Boolean>
 ) {
 
     Row(
@@ -450,7 +450,7 @@ fun ThemeStandardGroups1(
                 text = { Text(text = "Palabra Clave", style = MaterialTheme.typography.bodyLarge, color = lightColorScheme().surface) },
                 leadingIcon = { Icon(Icons.Outlined.TextFields, contentDescription = null, tint = darkColorScheme().primary) },
                 trailingIcon = { Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = darkColorScheme().primary) },
-                onClick = onPalabrasClave
+                onClick = { openWordsDialog.value = true }
             )
             HorizontalFullwidth()
         }
@@ -710,7 +710,7 @@ fun BulbSlider() {
             }
             Column(modifier = Modifier.padding(bottom = 2.dp), verticalArrangement = Arrangement.Center) {
 
-                val texto = TextFieldState()
+                val texto = TextFieldState("0")
 
                 OutlinedTextField(
                     modifier = Modifier
@@ -835,12 +835,16 @@ fun WordsDialog(
 
 @Composable
 fun ChecklistItemExample() {
-    var checked by remember { mutableStateOf(false) }
+    var checked1 by remember { mutableStateOf(false) }
+    var checked2 by remember { mutableStateOf(false) }
+    var checked3 by remember { mutableStateOf(false) }
+    var checked4 by remember { mutableStateOf(false) }
+    var checked5 by remember { mutableStateOf(false) }
 
     Column(){
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().clickable { checked = !checked }
+            modifier = Modifier.fillMaxWidth().clickable { checked1 = !checked1 }
         ) {
             Text(
                 text = "Palabra 1",
@@ -849,13 +853,13 @@ fun ChecklistItemExample() {
             )
             Spacer(modifier = Modifier.weight(1f))
             Checkbox(
-                checked = checked,
-                onCheckedChange = { checked = it }
+                checked = checked1,
+                onCheckedChange = { checked1 = it }
             )
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().clickable { checked = !checked }
+            modifier = Modifier.fillMaxWidth().clickable { checked2 = !checked2 }
         ) {
             Text(
                 text = "Palabra 2",
@@ -864,13 +868,13 @@ fun ChecklistItemExample() {
             )
             Spacer(modifier = Modifier.weight(1f))
             Checkbox(
-                checked = checked,
-                onCheckedChange = { checked = it }
+                checked = checked2,
+                onCheckedChange = { checked2 = it }
             )
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().clickable { checked = !checked }
+            modifier = Modifier.fillMaxWidth().clickable { checked3 = !checked3 }
         ) {
             Text(
                 text = "Palabra 3",
@@ -879,13 +883,13 @@ fun ChecklistItemExample() {
             )
             Spacer(modifier = Modifier.weight(1f))
             Checkbox(
-                checked = checked,
-                onCheckedChange = { checked = it }
+                checked = checked3,
+                onCheckedChange = { checked3 = it }
             )
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().clickable { checked = !checked }
+            modifier = Modifier.fillMaxWidth().clickable { checked4 = !checked4 }
         ) {
             Text(
                 text = "Palabra 4",
@@ -894,13 +898,13 @@ fun ChecklistItemExample() {
             )
             Spacer(modifier = Modifier.weight(1f))
             Checkbox(
-                checked = checked,
-                onCheckedChange = { checked = it }
+                checked = checked4,
+                onCheckedChange = { checked4 = it }
             )
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().clickable { checked = !checked }
+            modifier = Modifier.fillMaxWidth().clickable { checked5 = !checked5 }
         ) {
             Text(
                 text = "Palabra 5",
@@ -909,8 +913,8 @@ fun ChecklistItemExample() {
             )
             Spacer(modifier = Modifier.weight(1f))
             Checkbox(
-                checked = checked,
-                onCheckedChange = { checked = it }
+                checked = checked5,
+                onCheckedChange = { checked5 = it }
             )
         }
     }

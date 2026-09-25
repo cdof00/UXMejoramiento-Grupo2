@@ -50,7 +50,7 @@ import androidx.compose.ui.unit.em
 import com.example.lightsleep.R
 
 @Composable
-fun AlarmaCreada(modifier: Modifier = Modifier) {
+fun AlarmaCreada(modifier: Modifier = Modifier, onCrearAlarma: () -> Unit = {}) {
     Box(
         modifier = modifier
             .requiredWidth(width = 428.dp)
@@ -92,6 +92,7 @@ fun AlarmaCreada(modifier: Modifier = Modifier) {
                 .requiredWidth(width = 83.dp)
                 .requiredHeight(height = 30.dp))
         BotonAgregarMini(
+            onClick = onCrearAlarma,
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
                 .offset(x = 262.dp,
@@ -105,7 +106,7 @@ fun AlarmaCreada(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun BotonAgregarMini(modifier: Modifier = Modifier) {
+fun BotonAgregarMini(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
@@ -122,7 +123,7 @@ fun BotonAgregarMini(modifier: Modifier = Modifier) {
                 .background(color = Color(0xff705dda))
         ) {
             IconButton(
-                onClick = { },
+                onClick = onClick,
                 modifier = Modifier
                     .padding(all = 10.dp)
             ) {
@@ -166,7 +167,7 @@ fun ListItem(modifier: Modifier = Modifier) {
             ) {
                 TypeText(
                     supportingText = "",
-                    labelText = "10:00 AM | L, M, J",
+                    labelText = "10:00 AM | L,M,J",
                     overlineText = "Alarma 1",
                 )
             }
