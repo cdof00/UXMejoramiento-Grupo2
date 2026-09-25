@@ -125,6 +125,10 @@ type Patron = 'custom' | 'lv' | 'odd' | 'every2';
             <mat-icon>today</mat-icon>
             Este día
           </a>
+          <a mat-button [routerLink]="tipo === 'break' ? ['/pausa', editId] : ['/aviso', editId]">
+            <mat-icon>{{ tipo === 'break' ? 'self_improvement' : 'alarm' }}</mat-icon>
+            {{ tipo === 'break' ? 'Iniciar pausa' : 'Ver aviso' }}
+          </a>
           <button mat-button type="button" (click)="pausar()">
             <mat-icon>{{ paused ? 'play_arrow' : 'pause' }}</mat-icon>
             {{ paused ? 'Reanudar serie' : 'Pausar serie' }}
@@ -261,11 +265,7 @@ export class ActividadPage implements OnInit {
 
   borrar(): void {
     if (!this.editId) return;
-    if (!confirm('¿Borrar toda la serie?')) return;
-
-    this.store.borrar(this.editId);
-    this.snack.open('Serie borrada', 'Ok', { duration: 2500 });
-    this.router.navigateByUrl('/');
+    this.router.navigate(['/confirmar', this.editId]);
   }
 
   guardar(): void {

@@ -1,8 +1,9 @@
 import { Component, OnDestroy, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ActivityStore } from '../data/activity.store';
 
 @Component({
  selector: 'app-pausa',
@@ -11,20 +12,24 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
   <div class="break-ov">
    <mat-icon class="break-icon">self_improvement</mat-icon>
    <p class="break-kicker">Pausa de pantalla</p>
-   <h1>Lev·ntate 5 minutos</h1>
+   <h1>Lev√°ntate 5 minutos</h1>
    <div class="timer">{{ reloj }}</div>
-   <p>Break de pantalla</p>
+   <p>{{ act?.name || 'Break de pantalla' }}</p>
    <div class="row" style="justify-content:center">
     <button mat-stroked-button type="button" (click)="masCinco()">Estoy en llamada (+5)</button>
     <button mat-button type="button" (click)="salir('Pausa saltada')">Saltar esta pausa</button>
-    <button mat-flat-button color="primary" type="button" (click)="salir('Listo. Otros 30 min de trabajo')">Ya me parÈ</button>
+    <button mat-flat-button color="primary" type="button" (click)="salir('Listo. Otros 30 min de trabajo')">Ya me par√©</button>
    </div>
   </div>
  `,
 })
 export class PausaPage implements OnDestroy {
+ private readonly route = inject(ActivatedRoute);
+ private readonly store = inject(ActivityStore);
  router = inject(Router);
  snack = inject(MatSnackBar);
+ readonly id = Number(this.route.snapshot.paramMap.get('id'));
+ readonly act = this.store.byId(this.id);
  segundos = 300;
  private t = setInterval(() => {
   if (this.segundos <= 0) {

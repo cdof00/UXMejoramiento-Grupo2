@@ -1,5 +1,6 @@
-import { Component, computed, inject } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Component, computed, inject, signal } from '@angular/core';
+import { Router, RouterLink, RouterOutlet, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -127,11 +128,18 @@ export class SemanaPage {
 
   readonly days = DAYS;
   vacio = false;
+  private readonly currentUrl = signal(this.router.url);
 
   readonly conFondo = computed(() => {
-    const url = this.router.url;
+    const url = this.currentUrl();
     return url.startsWith('/actividad') || url.startsWith('/este-dia');
   });
+
+  constructor() {
+    this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe((e) => this.currentUrl.set(e.urlAfterRedirects));
+  }
 
   cerrar(): void {
     this.router.navigateByUrl('/');
