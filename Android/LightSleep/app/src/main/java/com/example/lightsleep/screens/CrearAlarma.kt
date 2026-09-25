@@ -120,8 +120,6 @@ fun CrearAlarma(
 
     Box(
         modifier = modifier
-            .requiredWidth(width = LocalWindowInfo.current.containerDpSize.width)
-            .requiredHeight(height = LocalWindowInfo.current.containerDpSize.height)
             .background(color = darkColorScheme().surfaceContainerLowest)
     ) {
         if(openTimeDialog.value){
@@ -238,7 +236,8 @@ fun CrearAlarma(
                 .align(alignment = Alignment.TopStart)
                 .offset(
                     x = 0.dp,
-                    y = 164.dp
+                    y = LocalWindowInfo.current.containerDpSize.height/(7)
+
                 ),
             state = alarmViewModel.alarmNameState,
             lineLimits = TextFieldLineLimits.SingleLine,
@@ -316,7 +315,7 @@ fun CrearAlarma(
             .align(alignment = Alignment.TopStart)
             .offset(
                 x = 0.dp,
-                y = 287.dp
+                y = LocalWindowInfo.current.containerDpSize.height/(3.5f)
             ),
             openTimeDialog,
             openFreqDialog,
@@ -328,8 +327,8 @@ fun CrearAlarma(
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
                 .offset(
-                    x = 250.dp,
-                    y = 851.dp
+                    x = LocalWindowInfo.current.containerDpSize.width-159.dp,
+                    y = LocalWindowInfo.current.containerDpSize.height-120.dp
                 ),
             labelText = " Guardar",
             textColor = darkColorScheme().inverseSurface,
@@ -343,7 +342,7 @@ fun CrearAlarma(
                 .align(alignment = Alignment.TopStart)
                 .offset(
                     x = 41.dp,
-                    y = 851.dp
+                    y = LocalWindowInfo.current.containerDpSize.height-120.dp
                 ),
             labelText = " Cancelar",
             textColor = darkColorScheme().inverseSurface,

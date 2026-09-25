@@ -40,18 +40,18 @@ fun LightSleepApp(modifier: Modifier = Modifier) {
         modifier = modifier
     ) {
         composable("inicial") {
-            Inicial(
+            Inicial(modifier = Modifier.fillMaxSize(),
                 onCrearAlarma = { navController.navigate("crear_alarma") }
             )
         }
         composable("crear_alarma") {
-            CrearAlarma(
+            CrearAlarma(modifier = Modifier.fillMaxSize(),
                 onVolver = { navController.popBackStack() },
                 onCrear = { navController.navigate("alarma-creada") }
             )
         }
         composable("alarma-creada") {
-            AlarmaCreada(
+            AlarmaCreada(modifier = Modifier.fillMaxSize(),
                 onCrearAlarma = { navController.navigate("crear_alarma") }
             )
         }

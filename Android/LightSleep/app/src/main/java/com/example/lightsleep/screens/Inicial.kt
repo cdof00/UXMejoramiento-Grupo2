@@ -116,7 +116,7 @@ fun BotonAgregarGrande(
                     contentDescription = "Icon",
                     colorFilter = ColorFilter.tint(lightColorScheme().onSecondary),
                     modifier = Modifier
-                        .requiredSize(size = 32.dp))
+                        .requiredSize(size = 64.dp))
             }
         }
     }
