@@ -3,6 +3,7 @@ import { SemanaPage } from './pages/semana.page';
 import { ActividadPage } from './pages/actividad.page';
 import { EsteDiaPage } from './pages/este-dia.page';
 import { AvisoPage } from './pages/aviso.page';
+import { ConfirmarPage } from './pages/confirmar.page';
 
 export const routes: Routes = [
   {
@@ -14,6 +15,7 @@ export const routes: Routes = [
       { path: 'actividad/:id', component: ActividadPage, title: 'Editar actividad' },
       { path: 'este-dia/:id/:day', component: EsteDiaPage, title: 'Editar día específico' },
       { path: 'aviso/:id', component: AvisoPage, title: 'Aviso' },
+      { path: 'confirmar/:id', component: ConfirmarPage, title: 'Confirmar' },
     ],
   },
   { path: '**', redirectTo: '' },
