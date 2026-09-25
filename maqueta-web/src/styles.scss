@@ -330,6 +330,10 @@ app-aviso {
  text-align: center;
  padding: 24px;
 }
+.material-symbols-outlined {
+ font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
 .break-icon {
  font-size: 48px;
  width: 48px;
@@ -340,7 +344,9 @@ app-aviso {
  align-items: center;
  justify-content: center;
  overflow: visible;
+ font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
 }
+
 .break-kicker {
  letter-spacing: .12em;
  text-transform: uppercase;
