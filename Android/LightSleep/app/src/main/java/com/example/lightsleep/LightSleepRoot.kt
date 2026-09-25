@@ -15,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.lightsleep.screens.CrearAlarma
 import com.example.lightsleep.screens.Inicial
+import com.example.lightsleep.screens.ListaPalabrasClave
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,6 +45,12 @@ fun LightSleepApp(modifier: Modifier = Modifier) {
         }
         composable("crear_alarma") {
             CrearAlarma(
+                onVolver = { navController.popBackStack() },
+                onPalabrasClave = { navController.navigate("lista_palabras_clave") }
+            )
+        }
+        composable("lista_palabras_clave") {
+            ListaPalabrasClave(
                 onVolver = { navController.popBackStack() }
             )
         }

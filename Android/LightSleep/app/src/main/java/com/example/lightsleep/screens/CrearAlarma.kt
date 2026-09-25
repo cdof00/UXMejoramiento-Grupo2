@@ -3,6 +3,7 @@ package com.example.lightsleep.screens
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.requiredHeight
@@ -14,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -46,6 +48,8 @@ import androidx.compose.material.icons.outlined.Today
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
@@ -94,7 +98,12 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = viewModel()) {
+fun CrearAlarma(
+    modifier: Modifier = Modifier,
+    alarmViewModel: AlarmViewModel = viewModel(),
+    onVolver: () -> Unit = {},
+    onPalabrasClave: () -> Unit = {}
+) {
 
     val alarmHourState by alarmViewModel.alarmHour.collectAsState()
     val alarmMinuteState by alarmViewModel.alarmMinute.collectAsState()
@@ -107,6 +116,7 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
     val openFreqDialog = remember { mutableStateOf(false) }
     val openDateDialog = remember { mutableStateOf(false) }
     val openBulbDialog = remember { mutableStateOf(false) }
+    val openWordsDialog = remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -202,6 +212,12 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
             )
         }
 
+        if(openWordsDialog.value){
+            WordsDialog(onDismissRequest = {openWordsDialog.value = false},
+                onConfirmation = {openWordsDialog.value = false},
+                dialogTitle = "Seleccione palabras clave")
+        }
+
         TypeRoundSizeSmallStateEnabled(
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
@@ -212,7 +228,8 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
             labelText = " Volver",
             textColor = darkColorScheme().inverseSurface,
             backgroundColor = darkColorScheme().inverseOnSurface,
-            iconId = R.drawable.keyboard_return_24dp
+            iconId = R.drawable.keyboard_return_24dp,
+            onClick = onVolver
         )
 
         OutlinedTextField(
@@ -304,7 +321,8 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
             openTimeDialog,
             openFreqDialog,
             openDateDialog,
-            openBulbDialog)
+            openBulbDialog,
+            onPalabrasClave)
 
         TypeRoundSizeSmallStateEnabled(
             modifier = Modifier
@@ -316,7 +334,8 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
             labelText = " Guardar",
             textColor = darkColorScheme().inverseSurface,
             backgroundColor = darkColorScheme().inversePrimary,
-            iconId = R.drawable.check_24dp
+            iconId = R.drawable.check_24dp,
+            onClick = { }
 
         )
         TypeRoundSizeSmallStateEnabled(
@@ -329,13 +348,21 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
             labelText = " Cancelar",
             textColor = darkColorScheme().inverseSurface,
             backgroundColor = darkColorScheme().tertiaryContainer,
-            iconId = R.drawable.close_24dp
+            iconId = R.drawable.close_24dp,
+            onClick = onVolver
         )
     }
 }
 
 @Composable
-fun TypeRoundSizeSmallStateEnabled(modifier: Modifier = Modifier, labelText: String, textColor: Color, backgroundColor: Color, iconId: Int) {
+fun TypeRoundSizeSmallStateEnabled(
+    modifier: Modifier = Modifier,
+    labelText: String,
+    textColor: Color,
+    backgroundColor: Color,
+    iconId: Int,
+    onClick: () -> Unit = {}
+) {
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
@@ -351,7 +378,7 @@ fun TypeRoundSizeSmallStateEnabled(modifier: Modifier = Modifier, labelText: Str
                 modifier = Modifier
                     .clip(shape = RoundedCornerShape(100.dp)),
                 colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
-                onClick = { }) {
+                onClick = onClick) {
                 ButtonIcon(iconId = iconId)
                 Text(
                     text = labelText,
@@ -368,7 +395,14 @@ fun TypeRoundSizeSmallStateEnabled(modifier: Modifier = Modifier, labelText: Str
 }
 
 @Composable
-fun ThemeStandardGroups1(modifier: Modifier = Modifier, openTimeDialog: MutableState<Boolean>, openFreqDialog: MutableState<Boolean>, openDateDialog: MutableState<Boolean>, openBulbDialog: MutableState<Boolean>) {
+fun ThemeStandardGroups1(
+    modifier: Modifier = Modifier,
+    openTimeDialog: MutableState<Boolean>,
+    openFreqDialog: MutableState<Boolean>,
+    openDateDialog: MutableState<Boolean>,
+    openBulbDialog: MutableState<Boolean>,
+    onPalabrasClave: () -> Unit
+) {
 
     Row(
         modifier = modifier
@@ -416,7 +450,7 @@ fun ThemeStandardGroups1(modifier: Modifier = Modifier, openTimeDialog: MutableS
                 text = { Text(text = "Palabra Clave", style = MaterialTheme.typography.bodyLarge, color = lightColorScheme().surface) },
                 leadingIcon = { Icon(Icons.Outlined.TextFields, contentDescription = null, tint = darkColorScheme().primary) },
                 trailingIcon = { Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = darkColorScheme().primary) },
-                onClick = { openTimeDialog.value = true }
+                onClick = onPalabrasClave
             )
             HorizontalFullwidth()
         }
@@ -749,6 +783,135 @@ fun BulbSlider() {
                         .wrapContentHeight(align = Alignment.CenterVertically)
                 )
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WordsDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    dialogTitle: String
+) {
+    AlertDialog(
+        modifier = Modifier.requiredWidth(width = LocalWindowInfo.current.containerDpSize.width-20.dp),
+        containerColor = darkColorScheme().surfaceContainerHigh,
+        titleContentColor = darkColorScheme().onSurfaceVariant,
+        title = {
+            Text(text = dialogTitle)
+        },
+        text = {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                ChecklistItemExample()
+            } },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmation()
+                }
+            ) {
+                Text(text = "Guardar", color = darkColorScheme().primary)
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text(text = "Cancelar", color = darkColorScheme().primary)
+            }
+        }
+    )
+}
+
+
+@Composable
+fun ChecklistItemExample() {
+    var checked by remember { mutableStateOf(false) }
+
+    Column(){
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().clickable { checked = !checked }
+        ) {
+            Text(
+                text = "Palabra 1",
+                style = MaterialTheme.typography.bodyLarge,
+                color = darkColorScheme().onSurface
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Checkbox(
+                checked = checked,
+                onCheckedChange = { checked = it }
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().clickable { checked = !checked }
+        ) {
+            Text(
+                text = "Palabra 2",
+                style = MaterialTheme.typography.bodyLarge,
+                color = darkColorScheme().onSurface
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Checkbox(
+                checked = checked,
+                onCheckedChange = { checked = it }
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().clickable { checked = !checked }
+        ) {
+            Text(
+                text = "Palabra 3",
+                style = MaterialTheme.typography.bodyLarge,
+                color = darkColorScheme().onSurface
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Checkbox(
+                checked = checked,
+                onCheckedChange = { checked = it }
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().clickable { checked = !checked }
+        ) {
+            Text(
+                text = "Palabra 4",
+                style = MaterialTheme.typography.bodyLarge,
+                color = darkColorScheme().onSurface
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Checkbox(
+                checked = checked,
+                onCheckedChange = { checked = it }
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().clickable { checked = !checked }
+        ) {
+            Text(
+                text = "Palabra 5",
+                style = MaterialTheme.typography.bodyLarge,
+                color = darkColorScheme().onSurface
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Checkbox(
+                checked = checked,
+                onCheckedChange = { checked = it }
+            )
         }
     }
 }
