@@ -413,7 +413,7 @@ fun ThemeStandardGroups1(
         Column(
         ) {
             DropdownMenuItem(
-                modifier = Modifier.padding(top=10.dp),
+                modifier = Modifier.padding(top=5.dp),
                 text = { Text(text = "Hora", style = MaterialTheme.typography.bodyLarge, color = lightColorScheme().surface) },
                 leadingIcon = { Icon(Icons.Outlined.Alarm, contentDescription = null, tint = darkColorScheme().primary) },
                 trailingIcon = { Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = darkColorScheme().primary) },
@@ -421,7 +421,7 @@ fun ThemeStandardGroups1(
             )
             HorizontalFullwidth()
             DropdownMenuItem(
-                modifier = Modifier.padding( top=30.dp),
+                modifier = Modifier.padding( top=15.dp),
                 text = { Text(text = "Frecuencia", style = MaterialTheme.typography.bodyLarge, color = lightColorScheme().surface) },
                 leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null, tint = darkColorScheme().primary) },
                 trailingIcon = { Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = darkColorScheme().primary) },
@@ -429,7 +429,7 @@ fun ThemeStandardGroups1(
             )
             HorizontalFullwidth()
             DropdownMenuItem(
-                modifier = Modifier.padding( top=30.dp),
+                modifier = Modifier.padding( top=15.dp),
                 text = { Text(text = "Activa Por", style = MaterialTheme.typography.bodyLarge, color = lightColorScheme().surface) },
                 leadingIcon = { Icon(Icons.Outlined.Today, contentDescription = null, tint = darkColorScheme().primary) },
                 trailingIcon = { Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = darkColorScheme().primary) },
@@ -437,7 +437,7 @@ fun ThemeStandardGroups1(
             )
             HorizontalFullwidth()
             DropdownMenuItem(
-                modifier = Modifier.padding( top=30.dp),
+                modifier = Modifier.padding( top=15.dp),
                 text = { Text(text = "Opciones de Bombilllo", style = MaterialTheme.typography.bodyLarge, color = lightColorScheme().surface) },
                 leadingIcon = { Icon(Icons.Outlined.LightMode, contentDescription = null, tint = darkColorScheme().primary) },
                 trailingIcon = { Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = darkColorScheme().primary) },
@@ -445,7 +445,7 @@ fun ThemeStandardGroups1(
             )
             HorizontalFullwidth()
             DropdownMenuItem(
-                modifier = Modifier.padding( top=30.dp),
+                modifier = Modifier.padding( top=15.dp),
                 text = { Text(text = "Palabra Clave", style = MaterialTheme.typography.bodyLarge, color = lightColorScheme().surface) },
                 leadingIcon = { Icon(Icons.Outlined.TextFields, contentDescription = null, tint = darkColorScheme().primary) },
                 trailingIcon = { Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = darkColorScheme().primary) },
