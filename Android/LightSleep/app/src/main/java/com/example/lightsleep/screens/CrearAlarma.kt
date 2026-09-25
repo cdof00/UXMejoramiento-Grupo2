@@ -83,10 +83,11 @@ import com.example.lightsleep.viewmodels.AlarmViewModel
 @Composable
 fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = viewModel()) {
 
-    val alarmUiState by alarmViewModel.alarmState.collectAsState()
     val alarmHourState by alarmViewModel.alarmHour.collectAsState()
     val alarmMinuteState by alarmViewModel.alarmMinute.collectAsState()
-    val selectedDays = remember { mutableStateOf(setOf<Int>())  }
+    val alarmFreq by alarmViewModel.alarmFreq.collectAsState()
+
+    val selectedDays = remember { mutableStateOf(setOf<Int>())}
     val daysOfWeek = listOf("L", "M", "X", "J", "V", "S", "D")
 
     val openTimeDialog = remember { mutableStateOf(false) }
@@ -126,8 +127,13 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
                 onDismissRequest = {
                     selectedDays.value = emptySet()
                     openFreqDialog.value = false
+
                                    },
                 onConfirmation = {
+                    var days = ""
+                    selectedDays.value.forEach { item ->  days = days + ","+ daysOfWeek[item] }
+                    days.drop(1)
+                    alarmViewModel.updateFreq(days)
                     openFreqDialog.value = false
                 },
                 dialogTitle = "Frecuencia",
@@ -135,6 +141,7 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
                 selectedDays = selectedDays
             )
         }
+
         TypeRoundSizeSmallStateEnabled(
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)

@@ -3,6 +3,7 @@ package com.example.lightsleep.viewmodels
 
 import android.app.Application
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -25,6 +26,9 @@ class AlarmViewModel(application: Application) :  AndroidViewModel(application) 
     private val _alarmMinute = MutableStateFlow(-1)
     val alarmMinute: StateFlow<Int> = _alarmMinute.asStateFlow()
 
+    private val _alarmFreq = MutableStateFlow("")
+    val alarmFreq: StateFlow<String> = _alarmFreq.asStateFlow()
+
     private val _alarmState = MutableStateFlow(AlarmUiState())
     val alarmState: StateFlow<AlarmUiState> = _alarmState.asStateFlow()
 
@@ -44,6 +48,10 @@ class AlarmViewModel(application: Application) :  AndroidViewModel(application) 
 
     fun updateMinute(hora: Int) {
         _alarmMinute.value = hora
+    }
+
+    fun updateFreq(days: String) {
+        _alarmFreq.value = days
     }
 
 }
