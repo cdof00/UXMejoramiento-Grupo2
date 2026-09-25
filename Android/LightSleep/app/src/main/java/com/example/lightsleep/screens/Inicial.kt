@@ -62,18 +62,7 @@ fun Inicial(modifier: Modifier = Modifier) {
                     y = 71.dp)
                 .requiredWidth(width = 185.dp)
                 .requiredHeight(height = 56.dp))
-
-        Text(
-            text = "No tiene alarmas",
-            color = Color.White,
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier
-                .align(alignment = Alignment.TopStart)
-                .offset(x = 93.dp,
-                    y = 388.dp)
-                .requiredWidth(width = 244.dp)
-                .requiredHeight(height = 31.dp))
-        TypeRoundSizeLargeWidthDefaultStateEnabled(
+        BotonAgregarGrande(
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
                 .offset(x = 166.dp,
@@ -94,45 +83,7 @@ fun Inicial(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun TypeRoundSizeSmallWidthDefaultStateEnabled(modifier: Modifier = Modifier) {
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .requiredWidth(width = 53.dp)
-            .requiredHeight(height = 39.dp)
-    ) {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .requiredWidth(width = 40.dp)
-                .clip(shape = RoundedCornerShape(100.dp))
-                .background(color = Color(0xff705dda))
-        ) {
-            IconButton(
-                onClick = { },
-                modifier = Modifier
-                    .padding(all = 10.dp)
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .requiredSize(size = 40.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.add_24dp),
-                        contentDescription = "Icon",
-                        tint = lightColorScheme().onSecondary)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun TypeRoundSizeLargeWidthDefaultStateEnabled(modifier: Modifier = Modifier) {
+fun BotonAgregarGrande(modifier: Modifier = Modifier) {
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
