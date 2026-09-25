@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -59,6 +58,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
@@ -68,13 +68,17 @@ import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -90,11 +94,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CrearAlarma(
-    modifier: Modifier = Modifier,
-    alarmViewModel: AlarmViewModel = viewModel(),
-    onVolver: () -> Unit = {}
-) {
+fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = viewModel()) {
 
     val alarmHourState by alarmViewModel.alarmHour.collectAsState()
     val alarmMinuteState by alarmViewModel.alarmMinute.collectAsState()
@@ -106,6 +106,7 @@ fun CrearAlarma(
     val openTimeDialog = remember { mutableStateOf(false) }
     val openFreqDialog = remember { mutableStateOf(false) }
     val openDateDialog = remember { mutableStateOf(false) }
+    val openBulbDialog = remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -194,6 +195,13 @@ fun CrearAlarma(
             }
         }
 
+        if(openBulbDialog.value){
+            BulbDialog(
+                onDismissRequest = {openBulbDialog.value = false},
+                onConfirmation = {openBulbDialog.value = false}
+            )
+        }
+
         TypeRoundSizeSmallStateEnabled(
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
@@ -204,8 +212,7 @@ fun CrearAlarma(
             labelText = " Volver",
             textColor = darkColorScheme().inverseSurface,
             backgroundColor = darkColorScheme().inverseOnSurface,
-            iconId = R.drawable.keyboard_return_24dp,
-            onClick = onVolver
+            iconId = R.drawable.keyboard_return_24dp
         )
 
         OutlinedTextField(
@@ -296,7 +303,9 @@ fun CrearAlarma(
             ),
             openTimeDialog,
             openFreqDialog,
-            openDateDialog)
+            openDateDialog,
+            openBulbDialog)
+
         TypeRoundSizeSmallStateEnabled(
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
@@ -307,8 +316,7 @@ fun CrearAlarma(
             labelText = " Guardar",
             textColor = darkColorScheme().inverseSurface,
             backgroundColor = darkColorScheme().inversePrimary,
-            iconId = R.drawable.check_24dp,
-            onClick = { }
+            iconId = R.drawable.check_24dp
 
         )
         TypeRoundSizeSmallStateEnabled(
@@ -321,21 +329,13 @@ fun CrearAlarma(
             labelText = " Cancelar",
             textColor = darkColorScheme().inverseSurface,
             backgroundColor = darkColorScheme().tertiaryContainer,
-            iconId = R.drawable.close_24dp,
-            onClick = onVolver
+            iconId = R.drawable.close_24dp
         )
     }
 }
 
 @Composable
-fun TypeRoundSizeSmallStateEnabled(
-    modifier: Modifier = Modifier,
-    labelText: String,
-    textColor: Color,
-    backgroundColor: Color,
-    iconId: Int,
-    onClick: () -> Unit = {}
-) {
+fun TypeRoundSizeSmallStateEnabled(modifier: Modifier = Modifier, labelText: String, textColor: Color, backgroundColor: Color, iconId: Int) {
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
@@ -351,7 +351,7 @@ fun TypeRoundSizeSmallStateEnabled(
                 modifier = Modifier
                     .clip(shape = RoundedCornerShape(100.dp)),
                 colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
-                onClick = onClick) {
+                onClick = { }) {
                 ButtonIcon(iconId = iconId)
                 Text(
                     text = labelText,
@@ -368,7 +368,7 @@ fun TypeRoundSizeSmallStateEnabled(
 }
 
 @Composable
-fun ThemeStandardGroups1(modifier: Modifier = Modifier, openTimeDialog: MutableState<Boolean>, openFreqDialog: MutableState<Boolean>, openDateDialog: MutableState<Boolean>) {
+fun ThemeStandardGroups1(modifier: Modifier = Modifier, openTimeDialog: MutableState<Boolean>, openFreqDialog: MutableState<Boolean>, openDateDialog: MutableState<Boolean>, openBulbDialog: MutableState<Boolean>) {
 
     Row(
         modifier = modifier
@@ -408,7 +408,7 @@ fun ThemeStandardGroups1(modifier: Modifier = Modifier, openTimeDialog: MutableS
                 text = { Text(text = "Opciones de Bombilllo", style = MaterialTheme.typography.bodyLarge, color = lightColorScheme().surface) },
                 leadingIcon = { Icon(Icons.Outlined.LightMode, contentDescription = null, tint = darkColorScheme().primary) },
                 trailingIcon = { Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = darkColorScheme().primary) },
-                onClick = { openTimeDialog.value = true }
+                onClick = { openBulbDialog.value = true }
             )
             HorizontalFullwidth()
             DropdownMenuItem(
@@ -593,6 +593,160 @@ fun WeekdayToggleRow(daysOfWeek: List<String>,selectedDays: MutableState<Set<Int
                 Text(
                     text = day,
                     style = MaterialTheme.typography.labelLarge
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BulbDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit
+) {
+    AlertDialog(
+        modifier = Modifier.requiredWidth(width = LocalWindowInfo.current.containerDpSize.width-20.dp),
+        containerColor = darkColorScheme().surfaceContainerHigh,
+        titleContentColor = darkColorScheme().onSurfaceVariant,
+        text = {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                BulbSlider()
+            } },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmation()
+                }
+            ) {
+                Text(text = "Guardar", color = darkColorScheme().primary)
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text(text = "Cancelar", color = darkColorScheme().primary)
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BulbSlider() {
+    var sliderValue by remember { mutableFloatStateOf(0f) }
+    Column(verticalArrangement = Arrangement.Top){
+        Row() {
+            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.Center){
+                Text(
+                    text = "Brillo: ",
+                    color = lightColorScheme().onPrimary,
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier
+                        .wrapContentHeight(align = Alignment.CenterVertically)
+                )
+            }
+            Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.Center) {
+                Slider(
+                    steps = 9,
+                    value = sliderValue,
+                    onValueChange = { sliderValue = it },
+                    valueRange = 0f..1f
+                )
+            }
+        }
+        Row() {
+            Column(modifier = Modifier.padding(vertical=18.dp, horizontal = 16.dp), verticalArrangement = Arrangement.Center){
+                Text(
+                    text = "Tiempo de encendido:",
+                    color = lightColorScheme().onPrimary,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .wrapContentHeight(align = Alignment.CenterVertically)
+                )
+            }
+            Column(modifier = Modifier.padding(bottom = 2.dp), verticalArrangement = Arrangement.Center) {
+
+                val texto = TextFieldState()
+
+                OutlinedTextField(
+                    modifier = Modifier
+                        .requiredWidth(width = 50.dp),
+                    state = texto,
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    shape = RoundedCornerShape(
+                        topStart = 10.dp,
+                        topEnd = 10.dp,
+                        bottomEnd = 0.dp,
+                        bottomStart = 0.dp
+                    ),
+
+                    colors = TextFieldColors(
+                        focusedTextColor = darkColorScheme().inverseSurface,
+                        unfocusedTextColor = darkColorScheme().inverseSurface,
+                        disabledTextColor = darkColorScheme().inverseSurface,
+                        errorTextColor = darkColorScheme().inverseSurface,
+                        focusedContainerColor = darkColorScheme().inverseOnSurface,
+                        unfocusedContainerColor = darkColorScheme().inverseOnSurface,
+                        disabledContainerColor = darkColorScheme().inverseOnSurface,
+                        errorContainerColor = darkColorScheme().inverseOnSurface,
+                        cursorColor = darkColorScheme().primary,
+                        errorCursorColor = darkColorScheme().primary,
+                        textSelectionColors = TextSelectionColors(
+                            handleColor = darkColorScheme().primary,
+                            backgroundColor = darkColorScheme().primary
+                        ),
+                        focusedIndicatorColor = darkColorScheme().primary,
+                        unfocusedIndicatorColor = darkColorScheme().primary,
+                        disabledIndicatorColor = darkColorScheme().primary,
+                        errorIndicatorColor = darkColorScheme().primary,
+                        focusedLeadingIconColor = darkColorScheme().primary,
+                        unfocusedLeadingIconColor = darkColorScheme().primary,
+                        disabledLeadingIconColor = darkColorScheme().primary,
+                        errorLeadingIconColor = darkColorScheme().primary,
+                        focusedTrailingIconColor = darkColorScheme().primary,
+                        unfocusedTrailingIconColor = darkColorScheme().primary,
+                        disabledTrailingIconColor = darkColorScheme().primary,
+                        errorTrailingIconColor = darkColorScheme().primary,
+                        focusedLabelColor = darkColorScheme().primary,
+                        unfocusedLabelColor = darkColorScheme().primary,
+                        disabledLabelColor = darkColorScheme().primary,
+                        errorLabelColor = darkColorScheme().primary,
+                        focusedPlaceholderColor = darkColorScheme().primary,
+                        unfocusedPlaceholderColor = darkColorScheme().primary,
+                        disabledPlaceholderColor = darkColorScheme().primary,
+                        errorPlaceholderColor = darkColorScheme().primary,
+                        focusedSupportingTextColor = darkColorScheme().primary,
+                        unfocusedSupportingTextColor = darkColorScheme().primary,
+                        disabledSupportingTextColor = darkColorScheme().primary,
+                        errorSupportingTextColor = darkColorScheme().primary,
+                        focusedPrefixColor = darkColorScheme().primary,
+                        unfocusedPrefixColor = darkColorScheme().primary,
+                        disabledPrefixColor = darkColorScheme().primary,
+                        errorPrefixColor = darkColorScheme().primary,
+                        focusedSuffixColor = darkColorScheme().primary,
+                        unfocusedSuffixColor = darkColorScheme().primary,
+                        disabledSuffixColor = darkColorScheme().primary,
+                        errorSuffixColor = darkColorScheme().primary
+                    )
+                )
+            }
+            Column(modifier = Modifier.padding(vertical = 18.dp, horizontal = 16.dp), verticalArrangement = Arrangement.Center){
+                Text(
+                    text = "minutos",
+                    color = lightColorScheme().onPrimary,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .wrapContentHeight(align = Alignment.CenterVertically)
                 )
             }
         }
