@@ -1,6 +1,21 @@
 # MaquetaWeb
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.27.
+This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.0.
+
+## Requirements
+
+- Node.js `^22.22.3 || ^24.15.0 || >=26.0.0`
+- npm `^6.11.0 || ^7.5.6 || >=8.0.0`
+
+> This project uses Angular 22, which requires Node 24.15.0 or newer in the Node 24 LTS line.
+
+## Install dependencies
+
+```bash
+npm install
+```
+
+The dependency tree is kept up to date and should report **0 vulnerabilities** after installation.
 
 ## Development server
 
