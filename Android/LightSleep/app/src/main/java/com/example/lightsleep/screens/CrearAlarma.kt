@@ -90,7 +90,11 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = viewModel()) {
+fun CrearAlarma(
+    modifier: Modifier = Modifier,
+    alarmViewModel: AlarmViewModel = viewModel(),
+    onVolver: () -> Unit = {}
+) {
 
     val alarmHourState by alarmViewModel.alarmHour.collectAsState()
     val alarmMinuteState by alarmViewModel.alarmMinute.collectAsState()
@@ -200,7 +204,8 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
             labelText = " Volver",
             textColor = darkColorScheme().inverseSurface,
             backgroundColor = darkColorScheme().inverseOnSurface,
-            iconId = R.drawable.keyboard_return_24dp
+            iconId = R.drawable.keyboard_return_24dp,
+            onClick = onVolver
         )
 
         OutlinedTextField(
@@ -302,7 +307,8 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
             labelText = " Guardar",
             textColor = darkColorScheme().inverseSurface,
             backgroundColor = darkColorScheme().inversePrimary,
-            iconId = R.drawable.check_24dp
+            iconId = R.drawable.check_24dp,
+            onClick = { }
 
         )
         TypeRoundSizeSmallStateEnabled(
@@ -315,13 +321,21 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
             labelText = " Cancelar",
             textColor = darkColorScheme().inverseSurface,
             backgroundColor = darkColorScheme().tertiaryContainer,
-            iconId = R.drawable.close_24dp
+            iconId = R.drawable.close_24dp,
+            onClick = onVolver
         )
     }
 }
 
 @Composable
-fun TypeRoundSizeSmallStateEnabled(modifier: Modifier = Modifier, labelText: String, textColor: Color, backgroundColor: Color, iconId: Int) {
+fun TypeRoundSizeSmallStateEnabled(
+    modifier: Modifier = Modifier,
+    labelText: String,
+    textColor: Color,
+    backgroundColor: Color,
+    iconId: Int,
+    onClick: () -> Unit = {}
+) {
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
@@ -337,7 +351,7 @@ fun TypeRoundSizeSmallStateEnabled(modifier: Modifier = Modifier, labelText: Str
                 modifier = Modifier
                     .clip(shape = RoundedCornerShape(100.dp)),
                 colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
-                onClick = { }) {
+                onClick = onClick) {
                 ButtonIcon(iconId = iconId)
                 Text(
                     text = labelText,

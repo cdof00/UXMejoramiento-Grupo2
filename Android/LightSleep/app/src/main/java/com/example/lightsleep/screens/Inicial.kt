@@ -33,7 +33,10 @@ import androidx.compose.material3.lightColorScheme
 import com.example.lightsleep.R
 
 @Composable
-fun Inicial(modifier: Modifier = Modifier) {
+fun Inicial(
+    modifier: Modifier = Modifier,
+    onCrearAlarma: () -> Unit = {}
+) {
     Box(
         modifier = modifier
             .requiredWidth(width = 428.dp)
@@ -63,6 +66,7 @@ fun Inicial(modifier: Modifier = Modifier) {
                 .requiredWidth(width = 185.dp)
                 .requiredHeight(height = 56.dp))
         BotonAgregarGrande(
+            onClick = onCrearAlarma,
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
                 .offset(x = 166.dp,
@@ -83,7 +87,10 @@ fun Inicial(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun BotonAgregarGrande(modifier: Modifier = Modifier) {
+fun BotonAgregarGrande(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
@@ -97,9 +104,8 @@ fun BotonAgregarGrande(modifier: Modifier = Modifier) {
                 .clip(shape = RoundedCornerShape(100.dp))
                 .background(color = Color(0xff705dda))
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
+            IconButton(
+                onClick = onClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .requiredHeight(height = 96.dp)
