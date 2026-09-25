@@ -10,7 +10,7 @@ import { ActivityStore } from '../data/activity.store';
  imports: [MatButtonModule, MatIconModule, MatSnackBarModule],
  template: `
   <div class="break-ov">
-   <span class="break-icon">🧘</span>
+   <mat-icon class="break-icon">self_improvement</mat-icon>
    <p class="break-kicker">Pausa de pantalla</p>
    <h1>Levántate 5 minutos</h1>
    <div class="timer">{{ reloj }}</div>

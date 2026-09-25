@@ -334,7 +334,12 @@ app-aviso {
  font-size: 48px;
  width: 48px;
  height: 48px;
+ line-height: 48px;
  color: var(--mint);
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ overflow: visible;
 }
 .break-kicker {
  letter-spacing: .12em;
