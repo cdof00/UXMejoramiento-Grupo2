@@ -125,10 +125,6 @@ type Patron = 'custom' | 'lv' | 'odd' | 'every2';
             <mat-icon>today</mat-icon>
             Este día
           </a>
-          <a mat-button [routerLink]="tipo === 'break' ? ['/pausa', editId] : ['/aviso', editId]">
-            <mat-icon>{{ tipo === 'break' ? 'self_improvement' : 'alarm' }}</mat-icon>
-            {{ tipo === 'break' ? 'Iniciar pausa' : 'Ver aviso' }}
-          </a>
           <button mat-button type="button" (click)="pausar()">
             <mat-icon>{{ paused ? 'play_arrow' : 'pause' }}</mat-icon>
             {{ paused ? 'Reanudar serie' : 'Pausar serie' }}

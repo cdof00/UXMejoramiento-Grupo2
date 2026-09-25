@@ -35,6 +35,8 @@ import { ActivityStore, DAYS, type Activity, type DayIndex } from '../data/activ
           </button>
           <mat-menu #menu="matMenu">
             <button mat-menu-item (click)="vacio = !vacio">{{ vacio ? 'Restaurar demo' : 'Ver lienzo vacío' }}</button>
+            <button mat-menu-item (click)="simularAviso()">Simular aviso</button>
+            <button mat-menu-item (click)="simularPausa()">Simular pausa</button>
           </mat-menu>
           <a mat-flat-button color="primary" routerLink="/actividad">
             <mat-icon>add</mat-icon>
@@ -166,5 +168,23 @@ export class SemanaPage {
 
   mostrarAviso(msg: string): void {
     this.snack.open(msg, 'Cerrar', { duration: 2800 });
+  }
+
+  simularAviso(): void {
+    const act = this.store.lista().find((a) => a.type === 'alarm');
+    if (act) {
+      this.router.navigate(['/aviso', act.id]);
+    } else {
+      this.mostrarAviso('No hay actividades de alarma para simular');
+    }
+  }
+
+  simularPausa(): void {
+    const act = this.store.lista().find((a) => a.type === 'break');
+    if (act) {
+      this.router.navigate(['/pausa', act.id]);
+    } else {
+      this.mostrarAviso('No hay breaks de pantalla para simular');
+    }
   }
 }
