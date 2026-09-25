@@ -124,15 +124,24 @@ export class ActivityStore {
   }
 
   guardar(data: Omit<Activity, 'id' | 'exceptions' | 'paused'> & { id?: number }): number {
+    const actividades = this.lista();
+    const usados = new Set(
+      actividades
+        .filter((actividad) => !data.id || actividad.id !== data.id)
+        .map((actividad) => actividad.color),
+    );
+    const color = usados.has(data.color) ? COLORES.find((c) => !usados.has(c)) ?? data.color : data.color;
+    const dataConColor = { ...data, color };
+
     if (data.id) {
-      this.lista.update((actividades) =>
-        actividades.map((actividad) => (actividad.id === data.id ? { ...actividad, ...data } : actividad)),
+      this.lista.update((lista) =>
+        lista.map((actividad) => (actividad.id === data.id ? { ...actividad, ...dataConColor } : actividad)),
       );
       return data.id;
     }
 
     const id = this.nextId++;
-    this.lista.update((actividades) => [...actividades, { ...data, id, paused: false, exceptions: {} }]);
+    this.lista.update((lista) => [...lista, { ...dataConColor, id, paused: false, exceptions: {} }]);
     return id;
   }
 
