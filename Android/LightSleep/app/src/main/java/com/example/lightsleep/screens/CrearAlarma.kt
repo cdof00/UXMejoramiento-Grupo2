@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
@@ -47,8 +49,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
@@ -62,6 +66,7 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.drawBehind
@@ -81,6 +86,8 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
     val alarmUiState by alarmViewModel.alarmState.collectAsState()
     val alarmHourState by alarmViewModel.alarmHour.collectAsState()
     val alarmMinuteState by alarmViewModel.alarmMinute.collectAsState()
+    val selectedDays = remember { mutableStateOf(setOf<Int>())  }
+    val daysOfWeek = listOf("L", "M", "X", "J", "V", "S", "D")
 
     val openTimeDialog = remember { mutableStateOf(false) }
     val openFreqDialog = remember { mutableStateOf(false) }
@@ -113,6 +120,21 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
                 timePickerState = timePickerState
             )
         }
+
+        if(openFreqDialog.value){
+            FreqDialog(
+                onDismissRequest = {
+                    selectedDays.value = emptySet()
+                    openFreqDialog.value = false
+                                   },
+                onConfirmation = {
+                    openFreqDialog.value = false
+                },
+                dialogTitle = "Frecuencia",
+                daysOfWeek = daysOfWeek,
+                selectedDays = selectedDays
+            )
+        }
         TypeRoundSizeSmallStateEnabled(
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
@@ -120,7 +142,7 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
                     x = 15.dp,
                     y = 50.dp
                 ),
-            labelText = "Volver",
+            labelText = " Volver",
             textColor = darkColorScheme().inverseSurface,
             backgroundColor = darkColorScheme().inverseOnSurface,
             iconId = R.drawable.keyboard_return_24dp
@@ -212,15 +234,16 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
                 x = 0.dp,
                 y = 287.dp
             ),
-            openTimeDialog)
+            openTimeDialog,
+            openFreqDialog)
         TypeRoundSizeSmallStateEnabled(
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
                 .offset(
-                    x = 281.dp,
+                    x = 250.dp,
                     y = 851.dp
                 ),
-            labelText = "Guardar",
+            labelText = " Guardar",
             textColor = darkColorScheme().inverseSurface,
             backgroundColor = darkColorScheme().inversePrimary,
             iconId = R.drawable.check_24dp
@@ -233,7 +256,7 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
                     x = 41.dp,
                     y = 851.dp
                 ),
-            labelText = "Cancelar",
+            labelText = " Cancelar",
             textColor = darkColorScheme().inverseSurface,
             backgroundColor = darkColorScheme().tertiaryContainer,
             iconId = R.drawable.close_24dp
@@ -275,7 +298,7 @@ fun TypeRoundSizeSmallStateEnabled(modifier: Modifier = Modifier, labelText: Str
 }
 
 @Composable
-fun ThemeStandardGroups1(modifier: Modifier = Modifier, openTimeDialog: MutableState<Boolean>) {
+fun ThemeStandardGroups1(modifier: Modifier = Modifier, openTimeDialog: MutableState<Boolean>, openFreqDialog: MutableState<Boolean>) {
 
     Row(
         modifier = modifier
@@ -299,7 +322,7 @@ fun ThemeStandardGroups1(modifier: Modifier = Modifier, openTimeDialog: MutableS
                 text = { Text(text = "Frecuencia", style = MaterialTheme.typography.bodyLarge, color = lightColorScheme().surface) },
                 leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null, tint = darkColorScheme().primary) },
                 trailingIcon = { Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = darkColorScheme().primary) },
-                onClick = { openTimeDialog.value = true }
+                onClick = { openFreqDialog.value = true }
             )
             HorizontalFullwidth()
             DropdownMenuItem(
@@ -357,7 +380,7 @@ fun ButtonIcon(modifier: Modifier = Modifier, iconId: Int) {
 fun TimePickerAlarma(
     timePickerState: TimePickerState
 ) {
-    Column {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         TimeInput(
             state = timePickerState,
             colors = TimePickerDefaults.colors(
@@ -385,14 +408,19 @@ fun TimeDialog(
     timePickerState: TimePickerState
 ) {
     AlertDialog(
+        modifier = Modifier.requiredWidth(width = LocalWindowInfo.current.containerDpSize.width-20.dp),
         containerColor = darkColorScheme().surfaceContainerHigh,
         titleContentColor = darkColorScheme().onSurfaceVariant,
         title = {
             Text(text = dialogTitle)
         },
-        text = {TimePickerAlarma(
-            timePickerState
-        )},
+        text = {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                TimePickerAlarma(timePickerState)
+            } },
         onDismissRequest = {
             onDismissRequest()
         },
@@ -423,17 +451,24 @@ fun FreqDialog(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
     dialogTitle: String,
-    timePickerState: TimePickerState
+    daysOfWeek: List<String>,
+    selectedDays: MutableState<Set<Int>>
 ) {
     AlertDialog(
+        modifier = Modifier.requiredWidth(width = LocalWindowInfo.current.containerDpSize.width-20.dp),
         containerColor = darkColorScheme().surfaceContainerHigh,
         titleContentColor = darkColorScheme().onSurfaceVariant,
         title = {
             Text(text = dialogTitle)
         },
-        text = {TimePickerAlarma(
-            timePickerState
-        )},
+        text = {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                WeekdayToggleRow(daysOfWeek = daysOfWeek, selectedDays = selectedDays)
+            }
+        },
         onDismissRequest = {
             onDismissRequest()
         },
@@ -456,6 +491,42 @@ fun FreqDialog(
             }
         }
     )
+}
+
+@Composable
+fun WeekdayToggleRow(daysOfWeek: List<String>,selectedDays: MutableState<Set<Int>>) {
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        daysOfWeek.forEachIndexed { index, day ->
+            val isSelected = selectedDays.value.contains(index)
+
+            FilledIconToggleButton(
+                checked = isSelected,
+                onCheckedChange = { checked ->
+                    selectedDays.value = if (checked) {
+                        selectedDays.value + index
+                    } else {
+                        selectedDays.value - index
+                    }
+                },
+                modifier = Modifier.size(30.dp), // M3 Target standard height
+                colors = IconButtonDefaults.filledIconToggleButtonColors(
+                    containerColor = darkColorScheme().primaryContainer,
+                    contentColor = darkColorScheme().onPrimaryContainer,
+                    checkedContainerColor = darkColorScheme().primary,
+                    checkedContentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Text(
+                    text = day,
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+        }
+    }
 }
 
 @Preview(widthDp = 428, heightDp = 926)
