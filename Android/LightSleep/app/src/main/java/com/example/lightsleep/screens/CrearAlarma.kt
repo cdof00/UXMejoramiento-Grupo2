@@ -126,8 +126,8 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
             FreqDialog(
                 onDismissRequest = {
                     selectedDays.value = emptySet()
+                    alarmViewModel.updateFreq("")
                     openFreqDialog.value = false
-
                                    },
                 onConfirmation = {
                     var days = ""
