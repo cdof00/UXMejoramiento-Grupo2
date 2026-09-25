@@ -1,5 +1,6 @@
 package com.example.lightsleep.screens
 
+import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -46,6 +47,9 @@ import androidx.compose.material.icons.outlined.Today
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,11 +61,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -75,9 +81,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lightsleep.R
 import com.example.lightsleep.viewmodels.AlarmViewModel
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,13 +94,14 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
 
     val alarmHourState by alarmViewModel.alarmHour.collectAsState()
     val alarmMinuteState by alarmViewModel.alarmMinute.collectAsState()
-    val alarmFreq by alarmViewModel.alarmFreq.collectAsState()
+    val datePickerState = rememberDatePickerState()
 
     val selectedDays = remember { mutableStateOf(setOf<Int>())}
     val daysOfWeek = listOf("L", "M", "X", "J", "V", "S", "D")
 
     val openTimeDialog = remember { mutableStateOf(false) }
     val openFreqDialog = remember { mutableStateOf(false) }
+    val openDateDialog = remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -128,7 +138,7 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
                     selectedDays.value = emptySet()
                     alarmViewModel.updateFreq("")
                     openFreqDialog.value = false
-                                   },
+                },
                 onConfirmation = {
                     var days = ""
                     selectedDays.value.forEach { item ->  days = days + ","+ daysOfWeek[item] }
@@ -140,6 +150,44 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
                 daysOfWeek = daysOfWeek,
                 selectedDays = selectedDays
             )
+        }
+
+        if(openDateDialog.value){
+            DatePickerDialog(
+                colors = DatePickerDefaults.colors(
+                    containerColor = darkColorScheme().surfaceContainerHigh,
+                ),
+                onDismissRequest = { openDateDialog.value = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val selectionMillis = datePickerState.selectedDateMillis
+                        }
+                    ) {
+                        Text("Guardar")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { openDateDialog.value = false }) {
+                        Text("Cancelar")
+                    }
+                }
+            ) {
+                // 5. Place the actual DatePicker inside the Dialog frame
+                DatePicker(
+                    colors = DatePickerDefaults.colors(
+                        containerColor = darkColorScheme().surfaceContainerHigh,
+                        titleContentColor = lightColorScheme().onPrimary,
+                        headlineContentColor = lightColorScheme().onPrimary,
+                        weekdayContentColor = lightColorScheme().onPrimary,
+                        subheadContentColor = lightColorScheme().onPrimary,
+                        navigationContentColor = lightColorScheme().onPrimary,
+                        yearContentColor = lightColorScheme().onPrimary,
+                        selectedYearContainerColor = lightColorScheme().primary,
+                        dayContentColor = lightColorScheme().onPrimary
+                    ),
+                    state = datePickerState)
+            }
         }
 
         TypeRoundSizeSmallStateEnabled(
@@ -176,7 +224,7 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
                 if (alarmViewModel.alarmNameState.text.isNotEmpty()) {
                     IconButton(onClick = { alarmViewModel.alarmNameState.edit {
                         replace(0, length, "")
-                     }}) {
+                    }}) {
                         Icon(
                             imageVector = Icons.Outlined.Cancel,
                             contentDescription = "Clear text"
@@ -242,7 +290,8 @@ fun CrearAlarma(modifier: Modifier = Modifier, alarmViewModel: AlarmViewModel = 
                 y = 287.dp
             ),
             openTimeDialog,
-            openFreqDialog)
+            openFreqDialog,
+            openDateDialog)
         TypeRoundSizeSmallStateEnabled(
             modifier = Modifier
                 .align(alignment = Alignment.TopStart)
@@ -305,7 +354,7 @@ fun TypeRoundSizeSmallStateEnabled(modifier: Modifier = Modifier, labelText: Str
 }
 
 @Composable
-fun ThemeStandardGroups1(modifier: Modifier = Modifier, openTimeDialog: MutableState<Boolean>, openFreqDialog: MutableState<Boolean>) {
+fun ThemeStandardGroups1(modifier: Modifier = Modifier, openTimeDialog: MutableState<Boolean>, openFreqDialog: MutableState<Boolean>, openDateDialog: MutableState<Boolean>) {
 
     Row(
         modifier = modifier
@@ -337,7 +386,7 @@ fun ThemeStandardGroups1(modifier: Modifier = Modifier, openTimeDialog: MutableS
                 text = { Text(text = "Activa Por", style = MaterialTheme.typography.bodyLarge, color = lightColorScheme().surface) },
                 leadingIcon = { Icon(Icons.Outlined.Today, contentDescription = null, tint = darkColorScheme().primary) },
                 trailingIcon = { Icon(Icons.Outlined.PlayArrow, contentDescription = null, tint = darkColorScheme().primary) },
-                onClick = { openTimeDialog.value = true }
+                onClick = { openDateDialog.value = true }
             )
             HorizontalFullwidth()
             DropdownMenuItem(
