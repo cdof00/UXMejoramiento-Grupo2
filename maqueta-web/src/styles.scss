@@ -265,3 +265,40 @@ box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
 .grid { grid-template-columns: 1fr; }
 .col { min-height: auto; }
 }
+
+app-pausa {
+ display: contents;
+}
+
+.timer {
+ font-size: 72px;
+ font-weight: 500;
+ margin: 8px 0;
+ font-variant-numeric: tabular-nums;
+ color: var(--lavender);
+}
+
+.break-ov {
+ position: fixed;
+ inset: 0;
+ z-index: 60;
+ background: rgba(11, 11, 18, 0.96);
+ display: grid;
+ place-items: center;
+ text-align: center;
+ padding: 24px;
+}
+.break-icon {
+ font-size: 48px;
+ width: 48px;
+ height: 48px;
+ color: var(--mint);
+}
+.break-kicker {
+ letter-spacing: .12em;
+ text-transform: uppercase;
+ color: var(--lavender);
+}
+app-confirmar {
+ display: contents;
+}
